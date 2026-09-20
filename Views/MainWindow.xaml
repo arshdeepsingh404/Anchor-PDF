@@ -1,0 +1,2279 @@
+<Window x:Class="Anchor_PDF.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodels="clr-namespace:Anchor_PDF.ViewModels"
+        xmlns:models="clr-namespace:Anchor_PDF.Models"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel, IsDesignTimeCreatable=False}"
+        Title="Anchor PDF"
+        Icon="/Assets/AppIcon.ico"
+        WindowState="Maximized"
+        Height="800" Width="1200"
+        MinHeight="640" MinWidth="960"
+        WindowStartupLocation="CenterScreen"
+        Background="#FFFFFF"
+        FontFamily="Segoe UI"
+        RenderOptions.BitmapScalingMode="HighQuality"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        AllowDrop="True"
+        Drop="Window_Drop"
+        DragOver="Window_DragOver">
+
+    <Window.Resources>
+        <!-- Flat Underline Nav Button Style -->
+        <Style x:Key="FlatUnderlineNavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#6B7280" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="18,14" />
+            <Setter Property="BorderThickness" Value="0,0,0,2" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="NavBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#111827" />
+                                <Setter TargetName="NavBorder" Property="Background" Value="#F9FAFB" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Window.DataContext>
+        <viewmodels:MainViewModel />
+    </Window.DataContext>
+
+    <Grid Background="#FFFFFF">
+        <Grid.RowDefinitions>
+            <!-- Row 0: Top Navigation Header -->
+            <RowDefinition Height="Auto" />
+            <!-- Row 1: Multi-Page Content Area -->
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ================= NAVIGATION HEADER (FLAT UNDERLINE) ================= -->
+        <Border Grid.Row="0"
+                Background="#FFFFFF"
+                BorderBrush="#E5E7EB"
+                BorderThickness="0,0,0,1"
+                Padding="24,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch">
+                <!-- Tab 1: PDF to Images -->
+                <Button Command="{Binding NavigateToCommand}" CommandParameter="PdfToImage">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FlatUnderlineNavButtonStyle}">
+                            <Setter Property="Padding" Value="14,12" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPdfToImageActive}" Value="True">
+                                    <Setter Property="Foreground" Value="#111827" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="BorderBrush" Value="#2563EB" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="PDF to Images" VerticalAlignment="Center" />
+                </Button>
+
+                <!-- Tab 2: Images to PDF -->
+                <Button Command="{Binding NavigateToCommand}" CommandParameter="ImageToPdf">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FlatUnderlineNavButtonStyle}">
+                            <Setter Property="Padding" Value="14,12" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsImageToPdfActive}" Value="True">
+                                    <Setter Property="Foreground" Value="#111827" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="BorderBrush" Value="#2563EB" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="Images to PDF" VerticalAlignment="Center" />
+                </Button>
+
+                <!-- Tab 3: Merge PDF -->
+                <Button Command="{Binding NavigateToCommand}" CommandParameter="MergePdf">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FlatUnderlineNavButtonStyle}">
+                            <Setter Property="Padding" Value="14,12" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMergePdfActive}" Value="True">
+                                    <Setter Property="Foreground" Value="#111827" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="BorderBrush" Value="#2563EB" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="Merge PDF" VerticalAlignment="Center" />
+                </Button>
+
+                <!-- Tab 4: Split PDF -->
+                <Button Command="{Binding NavigateToCommand}" CommandParameter="SplitPdf">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FlatUnderlineNavButtonStyle}">
+                            <Setter Property="Padding" Value="14,12" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSplitPdfActive}" Value="True">
+                                    <Setter Property="Foreground" Value="#111827" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="BorderBrush" Value="#2563EB" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="Split PDF" VerticalAlignment="Center" />
+                </Button>
+
+                <!-- Tab 5: Reorganize PDF -->
+                <Button Command="{Binding NavigateToCommand}" CommandParameter="ReorganizePdf">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FlatUnderlineNavButtonStyle}">
+                            <Setter Property="Padding" Value="14,12" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsReorganizePdfActive}" Value="True">
+                                    <Setter Property="Foreground" Value="#111827" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="BorderBrush" Value="#2563EB" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="Reorganize PDF" VerticalAlignment="Center" />
+                </Button>
+
+                <!-- Tab 6: Compress PDF -->
+                <Button Command="{Binding NavigateToCommand}" CommandParameter="CompressPdf">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FlatUnderlineNavButtonStyle}">
+                            <Setter Property="Padding" Value="14,12" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsCompressPdfActive}" Value="True">
+                                    <Setter Property="Foreground" Value="#111827" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="BorderBrush" Value="#2563EB" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="Compress PDF" VerticalAlignment="Center" />
+                </Button>
+
+                <!-- Tab 7: About -->
+                <Button Command="{Binding NavigateToCommand}" CommandParameter="About">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource FlatUnderlineNavButtonStyle}">
+                            <Setter Property="Padding" Value="14,12" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsAboutActive}" Value="True">
+                                    <Setter Property="Foreground" Value="#111827" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="BorderBrush" Value="#2563EB" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="About" VerticalAlignment="Center" />
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- ================= ROW 1: MULTI-PAGE CONTENT AREA ================= -->
+            <Grid Grid.Row="1" Background="#FFFFFF" Margin="36,20,36,20">
+
+            <!-- ================= PAGE 1: PDF TO IMAGES ================= -->
+            <Grid Visibility="{Binding IsPdfToImageActive, Converter={StaticResource BoolToVis}}"
+                  d:Visibility="Visible">
+                <Grid DataContext="{Binding PdfToImage}">
+                    <Grid.RowDefinitions>
+                        <!-- 0: Page Header & Toolbar -->
+                        <RowDefinition Height="Auto" />
+                        <!-- 1: Drop Zone Card -->
+                        <RowDefinition Height="Auto" />
+                        <!-- 2: Page Previews & Checkbox Selection Area -->
+                        <RowDefinition Height="*" MinHeight="220" />
+                        <!-- 3: Bottom Action Bar / Footer -->
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0: Page Header (Centered without Icon) -->
+                    <StackPanel Grid.Row="0" Margin="0,4,0,20" HorizontalAlignment="Center">
+                        <!-- Title & Subtitle -->
+                        <TextBlock Text="PDF to Images" 
+                                   FontSize="24" 
+                                   FontWeight="Bold" 
+                                   Foreground="#111827" 
+                                   TextAlignment="Center" 
+                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="Preview document pages, select specific pages with checkboxes, and export to images." 
+                                   FontSize="13" 
+                                   Foreground="#6B7280" 
+                                   TextAlignment="Center" 
+                                   HorizontalAlignment="Center" 
+                                   Margin="0,4,0,0" />
+                    </StackPanel>
+
+                    <!-- Row 1: Source File Selection & Conversion Settings -->
+                    <Grid Grid.Row="1" Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <!-- Left: Source File Selection (50%) -->
+                            <ColumnDefinition Width="*" />
+                            <!-- Spacing -->
+                            <ColumnDefinition Width="12" />
+                            <!-- Right: Format & Resolution Dropdowns (50%) -->
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left: Source File Selection Card -->
+                        <Border Grid.Column="0"
+                                Background="#F9FAFB" 
+                                BorderBrush="#E5E7EB" 
+                                BorderThickness="1" 
+                                CornerRadius="10" 
+                                Padding="16,12">
+                            <Grid VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Icon Box -->
+                                <Border Grid.Column="0" 
+                                        Background="#FFFFFF" 
+                                        BorderBrush="#E5E7EB" 
+                                        BorderThickness="1" 
+                                        CornerRadius="8" 
+                                        Width="40" Height="40" 
+                                        Margin="0,0,14,0"
+                                        VerticalAlignment="Center">
+                                    <Path Width="18" Height="18" Stretch="Uniform"
+                                          Data="M 14 2 L 6 2 C 4.9 2 4 2.9 4 4 L 4 20 C 4 21.1 4.9 22 6 22 L 18 22 C 19.1 22 20 21.1 20 20 L 20 8 Z M 14 2 L 14 8 L 20 8"
+                                          Stroke="#2563EB" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                                </Border>
+
+                                <!-- File Details / Placeholder -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <!-- Empty / Drag Prompt -->
+                                    <StackPanel Visibility="{Binding HasSelectedPdf, Converter={StaticResource InvBoolToVis}}"
+                                                d:Visibility="Visible">
+                                        <TextBlock Text="Drag and drop your PDF file here, or click to browse" 
+                                                   FontSize="13" 
+                                                   FontWeight="SemiBold" 
+                                                   Foreground="#111827" />
+                                        <TextBlock Text="Supported format: .pdf" 
+                                                   FontSize="11" 
+                                                   Foreground="#6B7280" 
+                                                   Margin="0,2,0,0" />
+                                    </StackPanel>
+
+                                    <!-- Selected State -->
+                                    <StackPanel Visibility="{Binding HasSelectedPdf, Converter={StaticResource BoolToVis}}"
+                                                d:Visibility="Collapsed">
+                                        <TextBlock Text="{Binding PdfFileName}" 
+                                                   FontSize="13" 
+                                                   FontWeight="SemiBold" 
+                                                   Foreground="#111827" 
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                            <TextBlock Text="{Binding TotalPages, StringFormat='{}{0} pages detected'}" 
+                                                       FontSize="11" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#2563EB" />
+                                            <TextBlock Text=" • " FontSize="11" Foreground="#9CA3AF" />
+                                            <TextBlock Text="{Binding SelectedPdfPath}" 
+                                                       FontSize="11" 
+                                                       Foreground="#6B7280" 
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxWidth="320" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Browse Button -->
+                                <Button Grid.Column="2" 
+                                        Content="Browse PDF" 
+                                        Style="{StaticResource ModernSecondaryButtonStyle}"
+                                        Command="{Binding SelectPdfCommand}" 
+                                        IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                        VerticalAlignment="Center"
+                                        Margin="12,0,0,0" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Right: Format & Resolution Dropdowns Card -->
+                        <Border Grid.Column="2"
+                                Background="#F9FAFB" 
+                                BorderBrush="#E5E7EB" 
+                                BorderThickness="1" 
+                                CornerRadius="10" 
+                                Padding="16,12">
+                            <Grid VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <!-- Format (50%) -->
+                                    <ColumnDefinition Width="*" />
+                                    <!-- Spacing -->
+                                    <ColumnDefinition Width="12" />
+                                    <!-- Resolution (50%) -->
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Format Dropdown -->
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="Format" 
+                                               FontSize="11" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="#6B7280" 
+                                               Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding AvailableFormats}" 
+                                              SelectedItem="{Binding SelectedFormat, Mode=TwoWay}"
+                                              Style="{StaticResource ModernComboBoxStyle}"
+                                              HorizontalAlignment="Stretch"
+                                              IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <!-- Resolution Dropdown -->
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                    <TextBlock Text="Resolution" 
+                                               FontSize="11" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="#6B7280" 
+                                               Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding AvailableDpiList}" 
+                                              SelectedItem="{Binding SelectedDpi, Mode=TwoWay}"
+                                              Style="{StaticResource ModernComboBoxStyle}"
+                                              HorizontalAlignment="Stretch"
+                                              IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding StringFormat='{}{0} DPI'}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Row 2: Page Previews & Selection Gallery -->
+                    <!-- Empty State View (When no PDF is loaded) -->
+                    <Border Grid.Row="2"
+                            Background="#FAFAFA"
+                            BorderBrush="#E5E7EB"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Margin="0,0,0,12"
+                            Visibility="{Binding HasPages, Converter={StaticResource InvBoolToVis}}"
+                            d:Visibility="Visible">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24">
+                            <Border Background="#F3F4F6" CornerRadius="28" Width="52" Height="52" Margin="0,0,0,10" HorizontalAlignment="Center">
+                                <Path Width="22" Height="22" Stretch="Uniform"
+                                      Data="M 14 2 L 6 2 C 4.9 2 4 2.9 4 4 L 4 20 C 4 21.1 4.9 22 6 22 L 18 22 C 19.1 22 20 21.1 20 20 L 20 8 Z M 14 2 L 14 8 L 20 8 M 9 13 L 15 13 M 9 17 L 13 17"
+                                      Stroke="#9CA3AF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Border>
+                            <TextBlock Text="No PDF Loaded" FontSize="14" FontWeight="SemiBold" Foreground="#374151" HorizontalAlignment="Center" />
+                            <TextBlock Text="Open a PDF to generate visual thumbnails and choose which pages to export." 
+                                       FontSize="12" Foreground="#6B7280" Margin="0,3,0,0" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Loaded State: Selection Toolbar & Previews Gallery -->
+                    <Border Grid.Row="2"
+                            Background="#FFFFFF"
+                            BorderBrush="#E5E7EB"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Margin="0,0,0,12"
+                            Visibility="{Binding HasPages, Converter={StaticResource BoolToVis}}"
+                            d:Visibility="Collapsed">
+                        <Grid Margin="12,10,12,10">
+                            <Grid.RowDefinitions>
+                                <!-- Toolbar -->
+                                <RowDefinition Height="Auto" />
+                                <!-- Scrollable Gallery -->
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Previews Toolbar -->
+                            <Grid Grid.Row="0" Margin="2,0,2,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Left: Selection Buttons -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Content="Select All" 
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Command="{Binding SelectAllPagesCommand}"
+                                            Padding="12,5" Margin="0,0,8,0" />
+                                    <Button Content="Deselect All" 
+                                            Style="{StaticResource ModernSecondaryButtonStyle}"
+                                            Command="{Binding DeselectAllPagesCommand}"
+                                            Padding="12,5" />
+                                </StackPanel>
+
+                                <!-- Right: Count Pill Badge -->
+                                <Border Grid.Column="1" 
+                                        Background="#EFF6FF" 
+                                        BorderBrush="#DBEAFE" 
+                                        BorderThickness="1" 
+                                        CornerRadius="12" 
+                                        Padding="14,4" 
+                                        HorizontalAlignment="Right" 
+                                        VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding SelectedPageCount}" FontWeight="Bold" Foreground="#2563EB" FontSize="12" />
+                                        <TextBlock Text=" of " Foreground="#6B7280" FontSize="12" />
+                                        <TextBlock Text="{Binding TotalPages}" FontWeight="Bold" Foreground="#111827" FontSize="12" />
+                                        <TextBlock Text=" pages selected" Foreground="#6B7280" FontSize="12" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Scrollable Pages Gallery -->
+                            <ScrollViewer Grid.Row="1" 
+                                          VerticalScrollBarVisibility="Auto" 
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          CanContentScroll="False"
+                                          Focusable="False">
+                                <ItemsControl ItemsSource="{Binding Pages}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <!-- Page Card -->
+                                            <Border Width="185" Height="250"
+                                                    Margin="6"
+                                                    CornerRadius="8"
+                                                    Background="#FFFFFF"
+                                                    BorderThickness="1.5"
+                                                    Cursor="Hand">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="BorderBrush" Value="#E5E7EB" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="BorderBrush" Value="#93C5FD" />
+                                                                <Setter Property="Background" Value="#F8FAFC" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                                                <Setter Property="Opacity" Value="0.5" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <Border.InputBindings>
+                                                    <MouseBinding Gesture="LeftClick" 
+                                                                  Command="{Binding DataContext.TogglePageSelectionCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                                  CommandParameter="{Binding}" />
+                                                </Border.InputBindings>
+
+                                                <Grid Margin="8,6,8,8">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+
+                                                    <!-- Card Header -->
+                                                    <Grid Grid.Row="0" Margin="0,0,0,6">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <CheckBox Grid.Column="0"
+                                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                  Style="{StaticResource ThumbnailCheckBoxStyle}"
+                                                                  VerticalAlignment="Center" />
+
+                                                        <Border Grid.Column="1"
+                                                                Background="#F3F4F6"
+                                                                CornerRadius="4"
+                                                                Padding="6,2"
+                                                                HorizontalAlignment="Right"
+                                                                VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding PageLabel}" 
+                                                                       FontSize="11" 
+                                                                       FontWeight="SemiBold" 
+                                                                       Foreground="#374151" />
+                                                        </Border>
+                                                    </Grid>
+
+                                                    <!-- Card Body: Thumbnail Image or Loading Placeholder -->
+                                                    <Border Grid.Row="1"
+                                                            Background="#F9FAFB"
+                                                            BorderBrush="#E5E7EB"
+                                                            BorderThickness="1"
+                                                            CornerRadius="6"
+                                                            ClipToBounds="True">
+                                                        <Grid>
+                                                            <!-- Loading State -->
+                                                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                                                                <Path Width="16" Height="16" Stretch="Uniform"
+                                                                      Data="M 12 2 A 10 10 0 1 0 22 12"
+                                                                      Stroke="#9CA3AF" StrokeThickness="2" StrokeStartLineCap="Round" />
+                                                                <TextBlock Text="Loading..." FontSize="10" Foreground="#9CA3AF" Margin="0,4,0,0" HorizontalAlignment="Center" />
+                                                            </StackPanel>
+
+                                                            <!-- Rendered Page Thumbnail -->
+                                                            <Image Source="{Binding Thumbnail}"
+                                                                   Stretch="Uniform"
+                                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                                   Visibility="{Binding IsLoading, Converter={StaticResource InvBoolToVis}}"
+                                                                   Margin="4" />
+                                                        </Grid>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 3: Pinned Bottom Action Bar / Footer -->
+                    <Grid Grid.Row="3" Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left: Status Indicator -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Background="#DCFCE7" CornerRadius="12" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center">
+                                <Path Width="12" Height="12" Stretch="Uniform"
+                                      Data="M 4 12 L 9 17 L 20 6"
+                                      Stroke="#16A34A" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding StatusMessage}" FontSize="13" FontWeight="SemiBold" Foreground="#111827" />
+                                <TextBlock Text="{Binding ProgressPercentage, StringFormat='{}Progress: {0:F0}%'}" 
+                                           FontSize="11" Foreground="#6B7280"
+                                           Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                           d:Visibility="Collapsed" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Right: Action Buttons -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Cancel" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding CancelCommand}" 
+                                    Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                    d:Visibility="Collapsed"
+                                    Margin="0,0,12,0" 
+                                    Padding="16,10" />
+
+                            <Button Content="Convert" 
+                                    Style="{StaticResource ModernDarkButtonStyle}"
+                                    Command="{Binding ConvertCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}" />
+                        </StackPanel>
+                    </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- ================= PAGE 2: IMAGES TO PDF ================= -->
+        <Grid Visibility="{Binding IsImageToPdfActive, Converter={StaticResource BoolToVis}}"
+              d:Visibility="Collapsed">
+            <Grid DataContext="{Binding ImageToPdf}">
+                <Grid.RowDefinitions>
+                    <!-- 0: Page Header -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 1: Action Toolbar & Drop Zone Card -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 2: Image List Container -->
+                    <RowDefinition Height="*" MinHeight="200" />
+                    <!-- 3: Page Layout Settings Card -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 4: Pinned Bottom Action Bar / Footer -->
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Row 0: Page Header (Centered without Icon) -->
+                <StackPanel Grid.Row="0" Margin="0,4,0,20" HorizontalAlignment="Center">
+                    <TextBlock Text="Images to PDF" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Foreground="#111827" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Combine multiple image files into a single structured PDF document with custom page layouts." 
+                               FontSize="13" 
+                               Foreground="#6B7280" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Row 1: Action Toolbar & Drop Zone Card -->
+                <Border Grid.Row="1"
+                        Background="#F9FAFB" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="16,12" 
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left: Add Button, Selection Controls & Counter Badge -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="+ Add Images" 
+                                    Style="{StaticResource ModernPrimaryButtonStyle}"
+                                    Command="{Binding AddImagesCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="14,8"
+                                    Margin="0,0,8,0" />
+
+                            <Button Content="Select All" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding SelectAllImagesCommand}"
+                                    IsEnabled="{Binding HasImages}"
+                                    Padding="10,6" 
+                                    Margin="0,0,6,0" />
+
+                            <Button Content="Deselect All" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding DeselectAllImagesCommand}"
+                                    IsEnabled="{Binding HasImages}"
+                                    Padding="10,6" 
+                                    Margin="0,0,10,0" />
+
+                            <!-- Counter Pill Badge (Visible when images added) -->
+                            <Border Background="#EFF6FF" 
+                                    BorderBrush="#DBEAFE" 
+                                    BorderThickness="1" 
+                                    CornerRadius="12" 
+                                    Padding="10,3" 
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding HasImages, Converter={StaticResource BoolToVis}}"
+                                    d:Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding SelectedImageCount}" FontWeight="Bold" Foreground="#2563EB" FontSize="11" />
+                                    <TextBlock Text=" of " Foreground="#6B7280" FontSize="11" />
+                                    <TextBlock Text="{Binding Images.Count}" FontWeight="Bold" Foreground="#111827" FontSize="11" />
+                                    <TextBlock Text=" selected" Foreground="#6B7280" FontSize="11" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Hint (Visible when no images added) -->
+                            <TextBlock Text="Drag and drop image files anywhere on the app" 
+                                       VerticalAlignment="Center" 
+                                       FontSize="12" 
+                                       Foreground="#6B7280"
+                                       Margin="6,0,0,0"
+                                       Visibility="{Binding HasImages, Converter={StaticResource InvBoolToVis}}"
+                                       d:Visibility="Visible" />
+                        </StackPanel>
+
+                        <!-- Right: Reorder & Delete Toolbar -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- Move Up -->
+                            <Button ToolTip="Move Selected Image Up" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding MoveUpCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="10,8"
+                                    Margin="0,0,6,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 12 19 L 12 5 M 5 12 L 12 5 L 19 12"
+                                      Stroke="#374151" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Move Down -->
+                            <Button ToolTip="Move Selected Image Down" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding MoveDownCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="10,8"
+                                    Margin="0,0,6,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 12 5 L 12 19 M 5 12 L 12 19 L 19 12"
+                                      Stroke="#374151" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Remove -->
+                            <Button ToolTip="Remove Selected" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding RemoveSelectedCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="10,8"
+                                    Margin="0,0,6,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 3 6 L 5 6 L 21 6 M 19 6 L 19 20 C 19 21.1 18.1 22 17 22 L 7 22 C 5.9 22 5 21.1 5 20 L 5 6 M 10 11 L 10 17 M 14 11 L 14 17 M 9 6 L 9 4 C 9 2.9 9.9 2 11 2 L 13 2 C 14.1 2 15 2.9 15 4 L 15 6"
+                                      Stroke="#EF4444" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Clear All -->
+                            <Button Content="Clear All" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding ClearAllCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 2: Image List Container -->
+                <Border Grid.Row="2"
+                        Background="#FFFFFF" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="14" 
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <!-- Empty State View (Default visible in designer) -->
+                        <StackPanel HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center" 
+                                    Visibility="{Binding HasImages, Converter={StaticResource InvBoolToVis}}"
+                                    d:Visibility="Visible"
+                                    Margin="0,24,0,24">
+                            <Border Background="#F3F4F6" CornerRadius="24" Width="44" Height="44" Margin="0,0,0,10" HorizontalAlignment="Center">
+                                <Path Width="20" Height="20" Stretch="Uniform"
+                                      Data="M 4 4 L 16 4 C 17.1 4 18 4.9 18 6 L 18 16 C 18 17.1 17.1 18 16 18 L 4 18 C 2.9 18 2 17.1 2 16 L 2 6 C 2 4.9 2.9 4 4 4 Z M 21 8 L 21 19 C 21 20.1 20.1 21 19 21 L 8 21 M 5 15 L 9 10 L 12 14 L 14 12 L 17 15"
+                                      Stroke="#9CA3AF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Border>
+                            <TextBlock Text="No images added yet" 
+                                       FontSize="14" 
+                                       FontWeight="SemiBold" 
+                                       Foreground="#374151" 
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="Click '+ Add Images' above or drag and drop PNG, JPEG, WebP, or BMP files" 
+                                       FontSize="12" 
+                                       Foreground="#9CA3AF" 
+                                       Margin="0,3,0,0" 
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- List of Images (Collapsed in designer by default) -->
+                        <ListBox ItemsSource="{Binding Images}" 
+                                 SelectedItem="{Binding SelectedImage, Mode=TwoWay}"
+                                 Visibility="{Binding HasImages, Converter={StaticResource BoolToVis}}"
+                                 d:Visibility="Collapsed"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="8,6" />
+                                    <Setter Property="Margin" Value="0,0,0,4" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border x:Name="ItemBorder" 
+                                                        Background="Transparent" 
+                                                        BorderBrush="#E5E7EB" 
+                                                        BorderThickness="1" 
+                                                        CornerRadius="6" 
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#F9FAFB" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#F3F4F6" />
+                                                        <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#93C5FD" />
+                                                    </Trigger>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="False">
+                                                        <Setter TargetName="ItemBorder" Property="Opacity" Value="0.55" />
+                                                    </DataTrigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="32" />
+                                            <ColumnDefinition Width="54" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- CheckBox to include/exclude from PDF compilation -->
+                                        <CheckBox Grid.Column="0"
+                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                  Style="{StaticResource ThumbnailCheckBoxStyle}"
+                                                  Margin="4,0,10,0"
+                                                  VerticalAlignment="Center" />
+
+                                        <!-- Order Index Badge -->
+                                        <Border Grid.Column="1" 
+                                                Background="#E5E7EB" 
+                                                CornerRadius="10" 
+                                                Width="22" Height="22" 
+                                                VerticalAlignment="Center" 
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding OrderIndex}" 
+                                                       FontSize="11" 
+                                                       FontWeight="Bold" 
+                                                       Foreground="#374151" 
+                                                       HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+
+                                        <!-- Thumbnail Image -->
+                                        <Border Grid.Column="2" 
+                                                CornerRadius="4" 
+                                                ClipToBounds="True" 
+                                                Width="44" Height="44" 
+                                                Background="#F3F4F6" 
+                                                BorderBrush="#E5E7EB" 
+                                                BorderThickness="1"
+                                                VerticalAlignment="Center">
+                                            <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
+                                        </Border>
+
+                                        <!-- Metadata -->
+                                        <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="12,0,0,0">
+                                            <TextBlock Text="{Binding FileName}" 
+                                                       FontSize="13" 
+                                                       FontWeight="SemiBold" 
+                                                       Foreground="#111827" 
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                                <TextBlock Text="{Binding ResolutionText}" FontSize="12" Foreground="#6B7280" />
+                                                <TextBlock Text=" • " FontSize="12" Foreground="#9CA3AF" />
+                                                <TextBlock Text="{Binding FormattedFileSize}" FontSize="12" Foreground="#6B7280" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+
+                <!-- Row 3: Page Layout Settings Card -->
+                <Border Grid.Row="3"
+                        Background="#F9FAFB" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="16,12" 
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <!-- Sizing Preset (33.3%) -->
+                            <ColumnDefinition Width="*" />
+                            <!-- Spacing -->
+                            <ColumnDefinition Width="14" />
+                            <!-- Orientation (33.3%) -->
+                            <ColumnDefinition Width="*" />
+                            <!-- Spacing -->
+                            <ColumnDefinition Width="14" />
+                            <!-- Margin (33.3%) -->
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Page Size Preset -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="PAGE SIZING" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,6" />
+                            <ComboBox ItemsSource="{Binding AvailablePageSizes}" 
+                                      SelectedItem="{Binding SelectedPageSize, Mode=TwoWay}"
+                                      Style="{StaticResource ModernComboBoxStyle}"
+                                      IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}" />
+                        </StackPanel>
+
+                        <!-- Orientation -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="ORIENTATION" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,6" />
+                            <ComboBox ItemsSource="{Binding AvailableOrientations}" 
+                                      SelectedItem="{Binding SelectedOrientation, Mode=TwoWay}"
+                                      Style="{StaticResource ModernComboBoxStyle}"
+                                      IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}" />
+                        </StackPanel>
+
+                        <!-- Margin -->
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="PAGE MARGIN (PTS)" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,6" />
+                            <TextBox Text="{Binding MarginPoints, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource ModernTextBoxStyle}"
+                                     IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 4: Pinned Bottom Action Bar / Footer -->
+                <Grid Grid.Row="4" Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Status Indicator -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="#DCFCE7" CornerRadius="12" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Path Width="12" Height="12" Stretch="Uniform"
+                                  Data="M 4 12 L 9 17 L 20 6"
+                                  Stroke="#16A34A" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="13" FontWeight="SemiBold" Foreground="#111827" />
+                            <TextBlock Text="{Binding ProgressPercentage, StringFormat='{}Progress: {0:F0}%'}" 
+                                       FontSize="11" Foreground="#6B7280"
+                                       Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                       d:Visibility="Collapsed" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Right: Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="Cancel" 
+                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                Command="{Binding CancelCommand}" 
+                                Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                d:Visibility="Collapsed"
+                                Margin="0,0,12,0" 
+                                Padding="16,10" />
+
+                        <Button Content="Convert" 
+                                Style="{StaticResource ModernDarkButtonStyle}"
+                                Command="{Binding ConvertCommand}" 
+                                IsEnabled="{Binding CanConvert}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- ================= PAGE 3: MERGE PDF ================= -->
+        <Grid Visibility="{Binding IsMergePdfActive, Converter={StaticResource BoolToVis}}"
+              d:Visibility="Collapsed">
+            <Grid DataContext="{Binding MergePdf}">
+                <Grid.RowDefinitions>
+                    <!-- 0: Page Header -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 1: Action Toolbar & Add Zone Card -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 2: File List Container -->
+                    <RowDefinition Height="*" MinHeight="220" />
+                    <!-- 3: Pinned Bottom Action Bar / Footer -->
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Row 0: Centered Header (No Icon) -->
+                <StackPanel Grid.Row="0" Margin="0,4,0,20" HorizontalAlignment="Center">
+                    <TextBlock Text="Merge PDFs" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Foreground="#111827" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Combine multiple PDF documents into a single organized PDF file." 
+                               FontSize="13" 
+                               Foreground="#6B7280" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Row 1: Action Toolbar & Add Zone Card -->
+                <Border Grid.Row="1"
+                        Background="#F9FAFB" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="16,12" 
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left: Add Button & Stats Badge -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="+ Add PDFs" 
+                                    Style="{StaticResource ModernPrimaryButtonStyle}"
+                                    Command="{Binding AddFilesCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="14,8"
+                                    Margin="0,0,8,0" />
+
+                            <Button Content="Clear All" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding ClearAllCommand}"
+                                    IsEnabled="{Binding HasFiles}"
+                                    Padding="10,6" 
+                                    Margin="0,0,10,0" />
+
+                            <!-- Counter Pill Badge -->
+                            <Border Background="#EFF6FF" 
+                                    BorderBrush="#DBEAFE" 
+                                    BorderThickness="1" 
+                                    CornerRadius="12" 
+                                    Padding="10,3" 
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding HasFiles, Converter={StaticResource BoolToVis}}"
+                                    d:Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding TotalFilesCount}" FontWeight="Bold" Foreground="#2563EB" FontSize="11" />
+                                    <TextBlock Text=" files • " Foreground="#6B7280" FontSize="11" />
+                                    <TextBlock Text="{Binding TotalPageCount}" FontWeight="Bold" Foreground="#111827" FontSize="11" />
+                                    <TextBlock Text=" pages total" Foreground="#6B7280" FontSize="11" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Hint when empty -->
+                            <TextBlock Text="Drag and drop multiple PDF files anywhere on the app" 
+                                       VerticalAlignment="Center" 
+                                       FontSize="12" 
+                                       Foreground="#6B7280"
+                                       Margin="6,0,0,0"
+                                       Visibility="{Binding HasFiles, Converter={StaticResource InvBoolToVis}}"
+                                       d:Visibility="Visible" />
+                        </StackPanel>
+
+                        <!-- Right: Reorder & Delete Toolbar -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- Move Up -->
+                            <Button ToolTip="Move Selected PDF Up" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding MoveUpCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="10,8"
+                                    Margin="0,0,6,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 12 19 L 12 5 M 5 12 L 12 5 L 19 12"
+                                      Stroke="#374151" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Move Down -->
+                            <Button ToolTip="Move Selected PDF Down" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding MoveDownCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="10,8"
+                                    Margin="0,0,6,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 12 5 L 12 19 M 5 12 L 12 19 L 19 12"
+                                      Stroke="#374151" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Remove -->
+                            <Button ToolTip="Remove Selected" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding RemoveSelectedCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="10,8">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 3 6 L 5 6 L 21 6 M 19 6 L 19 20 C 19 21.1 18.1 22 17 22 L 7 22 C 5.9 22 5 21.1 5 20 L 5 6 M 10 11 L 10 17 M 14 11 L 14 17 M 9 6 L 9 4 C 9 2.9 9.9 2 11 2 L 13 2 C 14.1 2 15 2.9 15 4 L 15 6"
+                                      Stroke="#EF4444" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 2: File List Container -->
+                <Border Grid.Row="2"
+                        Background="#FFFFFF" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="14" 
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <!-- Empty State View -->
+                        <StackPanel HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center" 
+                                    Visibility="{Binding HasFiles, Converter={StaticResource InvBoolToVis}}"
+                                    d:Visibility="Visible"
+                                    Margin="0,24,0,24">
+                            <Border Background="#F3F4F6" CornerRadius="24" Width="44" Height="44" Margin="0,0,0,10" HorizontalAlignment="Center">
+                                <Path Width="20" Height="20" Stretch="Uniform"
+                                      Data="M 14 2 L 6 2 C 4.9 2 4 2.9 4 4 L 4 20 C 4 21.1 4.9 22 6 22 L 18 22 C 19.1 22 20 21.1 20 20 L 20 8 Z M 14 2 L 14 8 L 20 8 M 9 15 L 15 15 M 12 12 L 12 18"
+                                      Stroke="#9CA3AF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Border>
+                            <TextBlock Text="No PDF documents added yet" 
+                                       FontSize="14" 
+                                       FontWeight="SemiBold" 
+                                       Foreground="#374151" 
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="Click '+ Add PDFs' above or drag and drop multiple PDF files here" 
+                                       FontSize="12" 
+                                       Foreground="#9CA3AF" 
+                                       Margin="0,3,0,0" 
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- List of Files -->
+                        <ListBox ItemsSource="{Binding Files}" 
+                                 SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
+                                 Visibility="{Binding HasFiles, Converter={StaticResource BoolToVis}}"
+                                 d:Visibility="Collapsed"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="10,8" />
+                                    <Setter Property="Margin" Value="0,0,0,4" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border x:Name="ItemBorder" 
+                                                        Background="Transparent" 
+                                                        BorderBrush="#E5E7EB" 
+                                                        BorderThickness="1" 
+                                                        CornerRadius="6" 
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#F9FAFB" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="ItemBorder" Property="Background" Value="#F3F4F6" />
+                                                        <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#93C5FD" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="32" />
+                                            <ColumnDefinition Width="42" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Order Index Badge -->
+                                        <Border Grid.Column="0" 
+                                                Background="#E5E7EB" 
+                                                CornerRadius="10" 
+                                                Width="22" Height="22" 
+                                                VerticalAlignment="Center" 
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding OrderIndex}" 
+                                                       FontSize="11" 
+                                                       FontWeight="Bold" 
+                                                       Foreground="#374151" 
+                                                       HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" />
+                                        </Border>
+
+                                        <!-- Document Icon Box -->
+                                        <Border Grid.Column="1" 
+                                                Background="#FFFFFF" 
+                                                BorderBrush="#E5E7EB" 
+                                                BorderThickness="1" 
+                                                CornerRadius="6" 
+                                                Width="32" Height="32" 
+                                                VerticalAlignment="Center">
+                                            <Path Width="15" Height="15" Stretch="Uniform"
+                                                  Data="M 14 2 L 6 2 C 4.9 2 4 2.9 4 4 L 4 20 C 4 21.1 4.9 22 6 22 L 18 22 C 19.1 22 20 21.1 20 20 L 20 8 Z M 14 2 L 14 8 L 20 8"
+                                                  Stroke="#2563EB" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                                        </Border>
+
+                                        <!-- Metadata -->
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0">
+                                            <TextBlock Text="{Binding FileName}" 
+                                                       FontSize="13" 
+                                                       FontWeight="SemiBold" 
+                                                       Foreground="#111827" 
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                <TextBlock Text="{Binding PageCount, StringFormat='{}{0} pages'}" FontSize="11" FontWeight="SemiBold" Foreground="#2563EB" />
+                                                <TextBlock Text=" • " FontSize="11" Foreground="#9CA3AF" />
+                                                <TextBlock Text="{Binding FormattedFileSize}" FontSize="11" Foreground="#6B7280" />
+                                                <TextBlock Text=" • " FontSize="11" Foreground="#9CA3AF" />
+                                                <TextBlock Text="{Binding FilePath}" FontSize="11" Foreground="#9CA3AF" TextTrimming="CharacterEllipsis" MaxWidth="360" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+
+                <!-- Row 3: Pinned Bottom Action Bar / Footer -->
+                <Grid Grid.Row="3" Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Status Indicator -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="#DCFCE7" CornerRadius="12" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Path Width="12" Height="12" Stretch="Uniform"
+                                  Data="M 4 12 L 9 17 L 20 6"
+                                  Stroke="#16A34A" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="13" FontWeight="SemiBold" Foreground="#111827" />
+                            <TextBlock Text="{Binding ProgressPercentage, StringFormat='{}Progress: {0:F0}%'}" 
+                                       FontSize="11" Foreground="#6B7280"
+                                       Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                       d:Visibility="Collapsed" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Right: Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="Cancel" 
+                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                Command="{Binding CancelCommand}" 
+                                Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                d:Visibility="Collapsed"
+                                Margin="0,0,12,0" 
+                                Padding="16,10" />
+
+                        <Button Content="Convert" 
+                                Style="{StaticResource ModernDarkButtonStyle}"
+                                Command="{Binding ConvertCommand}" 
+                                IsEnabled="{Binding CanMerge}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- ================= PAGE 4: SPLIT PDF ================= -->
+        <Grid Visibility="{Binding IsSplitPdfActive, Converter={StaticResource BoolToVis}}"
+              d:Visibility="Collapsed">
+            <Grid DataContext="{Binding SplitPdf}">
+                <Grid.RowDefinitions>
+                    <!-- 0: Page Header -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 1: Source File Selection & Split Method Settings -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 2: Split Plan Preview Container -->
+                    <RowDefinition Height="*" MinHeight="220" />
+                    <!-- 3: Pinned Bottom Action Bar / Footer -->
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Row 0: Centered Header (No Icon) -->
+                <StackPanel Grid.Row="0" Margin="0,4,0,20" HorizontalAlignment="Center">
+                    <TextBlock Text="Split PDF" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Foreground="#111827" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Separate a PDF document into individual pages or custom page ranges." 
+                               FontSize="13" 
+                               Foreground="#6B7280" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Row 1: Source File Selection & Split Method -->
+                <Grid Grid.Row="1" Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <!-- Left: Source File Selection (50%) -->
+                        <ColumnDefinition Width="*" />
+                        <!-- Spacing -->
+                        <ColumnDefinition Width="12" />
+                        <!-- Right: Split Method & Configuration (50%) -->
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Source File Selection Card -->
+                    <Border Grid.Column="0"
+                            Background="#F9FAFB" 
+                            BorderBrush="#E5E7EB" 
+                            BorderThickness="1" 
+                            CornerRadius="10" 
+                            Padding="16,12">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Icon Box -->
+                            <Border Grid.Column="0" 
+                                    Background="#FFFFFF" 
+                                    BorderBrush="#E5E7EB" 
+                                    BorderThickness="1" 
+                                    CornerRadius="8" 
+                                    Width="40" Height="40" 
+                                    Margin="0,0,14,0"
+                                    VerticalAlignment="Center">
+                                <Path Width="18" Height="18" Stretch="Uniform"
+                                      Data="M 14 2 L 6 2 C 4.9 2 4 2.9 4 4 L 4 20 C 4 21.1 4.9 22 6 22 L 18 22 C 19.1 22 20 21.1 20 20 L 20 8 Z M 14 2 L 14 8 L 20 8"
+                                      Stroke="#2563EB" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Border>
+
+                            <!-- File Details / Placeholder -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Visibility="{Binding HasSelectedPdf, Converter={StaticResource InvBoolToVis}}"
+                                            d:Visibility="Visible">
+                                    <TextBlock Text="Drag and drop your PDF file here, or click to browse" 
+                                               FontSize="13" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="#111827" />
+                                    <TextBlock Text="Supported format: .pdf" 
+                                               FontSize="11" 
+                                               Foreground="#6B7280" 
+                                               Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <StackPanel Visibility="{Binding HasSelectedPdf, Converter={StaticResource BoolToVis}}"
+                                            d:Visibility="Collapsed">
+                                    <TextBlock Text="{Binding PdfFileName}" 
+                                               FontSize="13" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="#111827" 
+                                               TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding TotalPages, StringFormat='{}{0} pages detected'}" 
+                                                   FontSize="11" 
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#2563EB" />
+                                        <TextBlock Text=" • " FontSize="11" Foreground="#9CA3AF" />
+                                        <TextBlock Text="{Binding SelectedPdfPath}" 
+                                                   FontSize="11" 
+                                                   Foreground="#6B7280" 
+                                                   TextTrimming="CharacterEllipsis"
+                                                   MaxWidth="320" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Browse Button -->
+                            <Button Grid.Column="2" 
+                                    Content="Browse PDF" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding SelectPdfCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    VerticalAlignment="Center"
+                                    Margin="12,0,0,0" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Right: Split Method & Configuration Card -->
+                    <Border Grid.Column="2"
+                            Background="#F9FAFB" 
+                            BorderBrush="#E5E7EB" 
+                            BorderThickness="1" 
+                            CornerRadius="10" 
+                            Padding="16,12">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Method Selector -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="SPLIT METHOD" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,6" />
+                                <ComboBox ItemsSource="{Binding AvailableSplitModes}"
+                                          SelectedItem="{Binding SelectedSplitMode, Mode=TwoWay}"
+                                          Style="{StaticResource ModernComboBoxStyle}"
+                                          IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}" />
+                            </StackPanel>
+
+                            <!-- Dynamic Parameter Input -->
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                <!-- All Pages Info -->
+                                <StackPanel Visibility="{Binding IsAllPagesMode, Converter={StaticResource BoolToVis}}"
+                                            d:Visibility="Visible">
+                                    <TextBlock Text="EXTRACTION" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,6" />
+                                    <TextBlock Text="1 page per PDF file" FontSize="13" FontWeight="Medium" Foreground="#111827" Margin="0,6,0,0" />
+                                </StackPanel>
+
+                                <!-- Custom Range Input -->
+                                <StackPanel Visibility="{Binding IsCustomRangeMode, Converter={StaticResource BoolToVis}}"
+                                            d:Visibility="Collapsed">
+                                    <TextBlock Text="PAGE RANGE (E.G. 1-3, 5)" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,6" />
+                                    <TextBox Text="{Binding RangeExpression, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                             Style="{StaticResource ModernTextBoxStyle}"
+                                             IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}" />
+                                </StackPanel>
+
+                                <!-- Fixed Interval Input -->
+                                <StackPanel Visibility="{Binding IsFixedIntervalMode, Converter={StaticResource BoolToVis}}"
+                                            d:Visibility="Collapsed">
+                                    <TextBlock Text="PAGES PER FILE" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,6" />
+                                    <TextBox Text="{Binding PagesPerChunk, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                             Style="{StaticResource ModernTextBoxStyle}"
+                                             IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Row 2: Split Plan Preview Container -->
+                <Border Grid.Row="2"
+                        Background="#FFFFFF" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="24" 
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <!-- Empty State -->
+                        <StackPanel HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center" 
+                                    Visibility="{Binding HasSelectedPdf, Converter={StaticResource InvBoolToVis}}"
+                                    d:Visibility="Visible">
+                            <Border Background="#F3F4F6" CornerRadius="24" Width="44" Height="44" Margin="0,0,0,10" HorizontalAlignment="Center">
+                                <Path Width="20" Height="20" Stretch="Uniform"
+                                      Data="M 14 2 L 6 2 C 4.9 2 4 2.9 4 4 L 4 20 C 4 21.1 4.9 22 6 22 L 18 22 C 19.1 22 20 21.1 20 20 L 20 8 Z M 14 2 L 14 8 L 20 8 M 4 13 L 20 13"
+                                      Stroke="#9CA3AF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Border>
+                            <TextBlock Text="No PDF document selected" 
+                                       FontSize="14" 
+                                       FontWeight="SemiBold" 
+                                       Foreground="#374151" 
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="Select a PDF above or drag and drop a file to configure splitting" 
+                                       FontSize="12" 
+                                       Foreground="#9CA3AF" 
+                                       Margin="0,3,0,0" 
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Loaded State Details -->
+                        <StackPanel Visibility="{Binding HasSelectedPdf, Converter={StaticResource BoolToVis}}"
+                                    d:Visibility="Collapsed"
+                                    VerticalAlignment="Center" 
+                                    HorizontalAlignment="Center" 
+                                    MaxWidth="600">
+                            <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="10" Padding="24,20">
+                                <StackPanel>
+                                    <TextBlock Text="Split Strategy Plan" FontSize="15" FontWeight="Bold" Foreground="#111827" Margin="0,0,0,8" />
+                                    <TextBlock Text="The output files will be written directly into the destination folder you choose when clicking Convert." 
+                                               FontSize="12" Foreground="#6B7280" Margin="0,0,0,14" />
+
+                                    <Separator Background="#E5E7EB" Margin="0,0,0,14" />
+
+                                    <!-- Mode description -->
+                                    <StackPanel Visibility="{Binding IsAllPagesMode, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock Text="Mode: Extract Every Page into its Own PDF" FontSize="13" FontWeight="SemiBold" Foreground="#111827" />
+                                        <TextBlock Text="Each individual page of the PDF will become a standalone single-page document." 
+                                                   FontSize="12" Foreground="#6B7280" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel Visibility="{Binding IsCustomRangeMode, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock Text="Mode: Extract Custom Page Range" FontSize="13" FontWeight="SemiBold" Foreground="#111827" />
+                                        <TextBlock Text="Only the pages matched by your range expression will be compiled and exported." 
+                                                   FontSize="12" Foreground="#6B7280" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel Visibility="{Binding IsFixedIntervalMode, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock Text="Mode: Fixed Interval Chunk Splitting" FontSize="13" FontWeight="SemiBold" Foreground="#111827" />
+                                        <TextBlock Text="The document will be split into multiple documents, each containing your chosen chunk size." 
+                                                   FontSize="12" Foreground="#6B7280" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <Separator Background="#E5E7EB" Margin="0,14,0,14" />
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="SOURCE DOCUMENT" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                            <TextBlock Text="{Binding PdfFileName}" FontSize="13" FontWeight="SemiBold" Foreground="#111827" Margin="0,3,0,10" TextTrimming="CharacterEllipsis" />
+
+                                            <TextBlock Text="TOTAL PAGES" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                            <TextBlock Text="{Binding TotalPages, StringFormat='{}{0} pages'}" FontSize="13" FontWeight="SemiBold" Foreground="#2563EB" Margin="0,3,0,0" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="SPLIT MODE" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                            <TextBlock Text="{Binding SelectedSplitMode}" FontSize="13" FontWeight="SemiBold" Foreground="#111827" Margin="0,3,0,10" />
+
+                                            <!-- Combine option if custom range -->
+                                            <StackPanel Visibility="{Binding IsCustomRangeMode, Converter={StaticResource BoolToVis}}">
+                                                <CheckBox Content="Combine into single PDF" 
+                                                          IsChecked="{Binding CombineIntoSingleFile, Mode=TwoWay}"
+                                                          Style="{StaticResource ModernCheckBoxStyle}"
+                                                          Margin="0,4,0,0" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 3: Pinned Bottom Action Bar / Footer -->
+                <Grid Grid.Row="3" Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Status Indicator -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="#DCFCE7" CornerRadius="12" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Path Width="12" Height="12" Stretch="Uniform"
+                                  Data="M 4 12 L 9 17 L 20 6"
+                                  Stroke="#16A34A" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="13" FontWeight="SemiBold" Foreground="#111827" />
+                            <TextBlock Text="{Binding ProgressPercentage, StringFormat='{}Progress: {0:F0}%'}" 
+                                       FontSize="11" Foreground="#6B7280"
+                                       Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                       d:Visibility="Collapsed" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Right: Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="Cancel" 
+                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                Command="{Binding CancelCommand}" 
+                                Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                d:Visibility="Collapsed"
+                                Margin="0,0,12,0" 
+                                Padding="16,10" />
+
+                        <Button Content="Convert" 
+                                Style="{StaticResource ModernDarkButtonStyle}"
+                                Command="{Binding ConvertCommand}" 
+                                IsEnabled="{Binding CanSplit}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- ================= PAGE 5: REORGANIZE PDF ================= -->
+        <Grid Visibility="{Binding IsReorganizePdfActive, Converter={StaticResource BoolToVis}}"
+              d:Visibility="Collapsed">
+            <Grid DataContext="{Binding ReorganizePdf}">
+                <Grid.RowDefinitions>
+                    <!-- 0: Page Header -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 1: Action Toolbar & File Status -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 2: Page Previews & Reordering Grid -->
+                    <RowDefinition Height="*" MinHeight="220" />
+                    <!-- 3: Pinned Bottom Action Bar / Footer -->
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Row 0: Centered Header (No Icon) -->
+                <StackPanel Grid.Row="0" Margin="0,4,0,20" HorizontalAlignment="Center">
+                    <TextBlock Text="Reorganize PDF" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Foreground="#111827" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Rearrange, rotate, duplicate, and remove pages with real-time visual previews." 
+                               FontSize="13" 
+                               Foreground="#6B7280" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Row 1: Action Toolbar & File Status -->
+                <Border Grid.Row="1"
+                        Background="#F9FAFB" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="16,10" 
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left: File Selector & Stats -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Browse PDF" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding SelectPdfCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="12,6"
+                                    Margin="0,0,10,0" />
+
+                            <Border Background="#EFF6FF" 
+                                    BorderBrush="#DBEAFE" 
+                                    BorderThickness="1" 
+                                    CornerRadius="12" 
+                                    Padding="10,3" 
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding HasSelectedPdf, Converter={StaticResource BoolToVis}}"
+                                    d:Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding PdfFileName}" FontWeight="SemiBold" Foreground="#111827" FontSize="11" MaxWidth="220" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text=" • " Foreground="#9CA3AF" FontSize="11" />
+                                    <TextBlock Text="{Binding Pages.Count}" FontWeight="Bold" Foreground="#2563EB" FontSize="11" />
+                                    <TextBlock Text=" pages in document" Foreground="#6B7280" FontSize="11" />
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="Drag and drop a PDF file anywhere on the window" 
+                                       VerticalAlignment="Center" 
+                                       FontSize="12" 
+                                       Foreground="#6B7280"
+                                       Margin="6,0,0,0"
+                                       Visibility="{Binding HasSelectedPdf, Converter={StaticResource InvBoolToVis}}"
+                                       d:Visibility="Visible" />
+                        </StackPanel>
+
+                        <!-- Right: Reordering & Rotation Controls -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                                    Visibility="{Binding HasSelectedPdf, Converter={StaticResource BoolToVis}}"
+                                    d:Visibility="Collapsed">
+                            <!-- Move Left -->
+                            <Button ToolTip="Move Selected Page Left" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding MoveLeftCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="8,6"
+                                    Margin="0,0,4,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 19 12 L 5 12 M 12 19 L 5 12 L 12 5"
+                                      Stroke="#374151" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Move Right -->
+                            <Button ToolTip="Move Selected Page Right" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding MoveRightCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="8,6"
+                                    Margin="0,0,6,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 5 12 L 19 12 M 12 5 L 19 12 L 12 19"
+                                      Stroke="#374151" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Rotate CCW -->
+                            <Button ToolTip="Rotate 90° Counter-Clockwise" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding RotateCounterClockwiseCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="8,6"
+                                    Margin="0,0,4,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 2.5 2 V 7 H 7.5 M 2.5 7 A 10 10 0 1 1 5 16"
+                                      Stroke="#374151" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Rotate CW -->
+                            <Button ToolTip="Rotate 90° Clockwise" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding RotateClockwiseCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="8,6"
+                                    Margin="0,0,6,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 21.5 2 V 7 H 16.5 M 21.5 7 A 10 10 0 1 0 19 16"
+                                      Stroke="#374151" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Duplicate -->
+                            <Button ToolTip="Duplicate Selected Page" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding DuplicatePageCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="8,6"
+                                    Margin="0,0,4,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 16 4 H 4 V 16 M 8 8 H 20 V 20 H 8 Z"
+                                      Stroke="#374151" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Delete -->
+                            <Button ToolTip="Delete Selected Page" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding DeletePageCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="8,6"
+                                    Margin="0,0,6,0">
+                                <Path Width="14" Height="14" Stretch="Uniform"
+                                      Data="M 3 6 L 5 6 L 21 6 M 19 6 L 19 20 C 19 21.1 18.1 22 17 22 L 7 22 C 5.9 22 5 21.1 5 20 L 5 6"
+                                      Stroke="#EF4444" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Button>
+
+                            <!-- Reset Order -->
+                            <Button Content="Reset" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding ResetOrderCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    Padding="8,6" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 2: Page Previews & Reordering Grid -->
+                <Border Grid.Row="2"
+                        Background="#FFFFFF" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="14" 
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <!-- Empty State -->
+                        <StackPanel HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center" 
+                                    Visibility="{Binding HasSelectedPdf, Converter={StaticResource InvBoolToVis}}"
+                                    d:Visibility="Visible">
+                            <Border Background="#F3F4F6" CornerRadius="24" Width="44" Height="44" Margin="0,0,0,10" HorizontalAlignment="Center">
+                                <Path Width="20" Height="20" Stretch="Uniform"
+                                      Data="M 4 6 H 20 M 4 12 H 20 M 4 18 H 20 M 7 3 L 4 6 L 7 9 M 17 15 L 20 18 L 17 21"
+                                      Stroke="#9CA3AF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Border>
+                            <TextBlock Text="No PDF document loaded" 
+                                       FontSize="14" 
+                                       FontWeight="SemiBold" 
+                                       Foreground="#374151" 
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="Click 'Browse PDF' above or drag and drop a PDF to reorganize pages" 
+                                       FontSize="12" 
+                                       Foreground="#9CA3AF" 
+                                       Margin="0,3,0,0" 
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Page Cards WrapPanel -->
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Visibility="{Binding HasSelectedPdf, Converter={StaticResource BoolToVis}}"
+                                      d:Visibility="Collapsed">
+                            <ItemsControl ItemsSource="{Binding Pages}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Width="185" Height="250"
+                                                Background="#FFFFFF"
+                                                BorderBrush="#E5E7EB"
+                                                BorderThickness="1"
+                                                CornerRadius="8"
+                                                Margin="6"
+                                                Padding="8"
+                                                Cursor="Hand">
+                                            <Border.InputBindings>
+                                                <MouseBinding Gesture="LeftClick" 
+                                                              Command="{Binding DataContext.SelectPageItemCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                              CommandParameter="{Binding}" />
+                                            </Border.InputBindings>
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="BorderBrush" Value="#60A5FA" />
+                                                            <Setter Property="BorderThickness" Value="2" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <!-- Top Card Header -->
+                                                    <RowDefinition Height="Auto" />
+                                                    <!-- Thumbnail -->
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Header: Page badge, Rotation tag, Original page -->
+                                                <Grid Grid.Row="0" Margin="0,0,0,6">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding CurrentOrderIndex, StringFormat='{}Page {0}'}" 
+                                                                   FontSize="12" 
+                                                                   FontWeight="Bold" 
+                                                                   Foreground="#111827" />
+                                                        <TextBlock Text="{Binding OriginalPageNumber, StringFormat='{} (#{0})'}" 
+                                                                   FontSize="10" 
+                                                                   Foreground="#9CA3AF" 
+                                                                   VerticalAlignment="Center" />
+                                                    </StackPanel>
+
+                                                    <!-- Rotation Angle Pill -->
+                                                    <Border Grid.Column="1" 
+                                                            Background="#FEF3C7" 
+                                                            CornerRadius="4" 
+                                                            Padding="4,1"
+                                                            VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding RotationAngle, StringFormat='{}{0}°'}" 
+                                                                   FontSize="10" 
+                                                                   FontWeight="Bold" 
+                                                                   Foreground="#B45309" />
+                                                    </Border>
+                                                </Grid>
+
+                                                <!-- Body: Rotated Thumbnail -->
+                                                <Border Grid.Row="1"
+                                                        Background="#F9FAFB"
+                                                        BorderBrush="#E5E7EB"
+                                                        BorderThickness="1"
+                                                        CornerRadius="6"
+                                                        ClipToBounds="True">
+                                                    <Grid>
+                                                        <!-- Loading indicator -->
+                                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="Loading..." FontSize="10" Foreground="#9CA3AF" HorizontalAlignment="Center" />
+                                                        </StackPanel>
+
+                                                        <!-- Page Image with Real-time Rotation Transform -->
+                                                        <Image Source="{Binding Thumbnail}"
+                                                               Stretch="Uniform"
+                                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                                               Visibility="{Binding IsLoading, Converter={StaticResource InvBoolToVis}}"
+                                                               Margin="4">
+                                                            <Image.LayoutTransform>
+                                                                <RotateTransform Angle="{Binding RotationAngle}" />
+                                                            </Image.LayoutTransform>
+                                                        </Image>
+                                                    </Grid>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <!-- Row 3: Pinned Bottom Action Bar / Footer -->
+                <Grid Grid.Row="3" Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Status Indicator -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="#DCFCE7" CornerRadius="12" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Path Width="12" Height="12" Stretch="Uniform"
+                                  Data="M 4 12 L 9 17 L 20 6"
+                                  Stroke="#16A34A" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="13" FontWeight="SemiBold" Foreground="#111827" />
+                            <TextBlock Text="{Binding ProgressPercentage, StringFormat='{}Progress: {0:F0}%'}" 
+                                       FontSize="11" Foreground="#6B7280"
+                                       Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                       d:Visibility="Collapsed" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Right: Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="Cancel" 
+                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                Command="{Binding CancelCommand}" 
+                                Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                d:Visibility="Collapsed"
+                                Margin="0,0,12,0" 
+                                Padding="16,10" />
+
+                        <Button Content="Convert" 
+                                Style="{StaticResource ModernDarkButtonStyle}"
+                                Command="{Binding ConvertCommand}" 
+                                IsEnabled="{Binding CanConvert}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- ================= PAGE 6: COMPRESS PDF ================= -->
+        <Grid Visibility="{Binding IsCompressPdfActive, Converter={StaticResource BoolToVis}}"
+              d:Visibility="Collapsed">
+            <Grid DataContext="{Binding CompressPdf}">
+                <Grid.RowDefinitions>
+                    <!-- 0: Page Header -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 1: Source File Selection & Compression Preset -->
+                    <RowDefinition Height="Auto" />
+                    <!-- 2: Compression Metrics / Result Container -->
+                    <RowDefinition Height="*" MinHeight="220" />
+                    <!-- 3: Pinned Bottom Action Bar / Footer -->
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Row 0: Centered Header (No Icon) -->
+                <StackPanel Grid.Row="0" Margin="0,4,0,20" HorizontalAlignment="Center">
+                    <TextBlock Text="Compress PDF" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Foreground="#111827" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Reduce PDF document file size while preserving high visual clarity." 
+                               FontSize="13" 
+                               Foreground="#6B7280" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Row 1: Source File Selection & Compression Preset -->
+                <Grid Grid.Row="1" Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <!-- Left: Source File Selection (50%) -->
+                        <ColumnDefinition Width="*" />
+                        <!-- Spacing -->
+                        <ColumnDefinition Width="12" />
+                        <!-- Right: Preset Selection (50%) -->
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Source File Selection Card -->
+                    <Border Grid.Column="0"
+                            Background="#F9FAFB" 
+                            BorderBrush="#E5E7EB" 
+                            BorderThickness="1" 
+                            CornerRadius="10" 
+                            Padding="16,12">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Icon Box -->
+                            <Border Grid.Column="0" 
+                                    Background="#FFFFFF" 
+                                    BorderBrush="#E5E7EB" 
+                                    BorderThickness="1" 
+                                    CornerRadius="8" 
+                                    Width="40" Height="40" 
+                                    Margin="0,0,14,0"
+                                    VerticalAlignment="Center">
+                                <Path Width="18" Height="18" Stretch="Uniform"
+                                      Data="M 14 2 L 6 2 C 4.9 2 4 2.9 4 4 L 4 20 C 4 21.1 4.9 22 6 22 L 18 22 C 19.1 22 20 21.1 20 20 L 20 8 Z M 14 2 L 14 8 L 20 8"
+                                      Stroke="#2563EB" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Border>
+
+                            <!-- File Details / Placeholder -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Visibility="{Binding HasSelectedPdf, Converter={StaticResource InvBoolToVis}}"
+                                            d:Visibility="Visible">
+                                    <TextBlock Text="Drag and drop your PDF file here, or click to browse" 
+                                               FontSize="13" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="#111827" />
+                                    <TextBlock Text="Supported format: .pdf" 
+                                               FontSize="11" 
+                                               Foreground="#6B7280" 
+                                               Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <StackPanel Visibility="{Binding HasSelectedPdf, Converter={StaticResource BoolToVis}}"
+                                            d:Visibility="Collapsed">
+                                    <TextBlock Text="{Binding PdfFileName}" 
+                                               FontSize="13" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="#111827" 
+                                               TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding OriginalSizeText, StringFormat='{}Original size: {0}'}" 
+                                                   FontSize="11" 
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#2563EB" />
+                                        <TextBlock Text=" • " FontSize="11" Foreground="#9CA3AF" />
+                                        <TextBlock Text="{Binding SelectedPdfPath}" 
+                                                   FontSize="11" 
+                                                   Foreground="#6B7280" 
+                                                   TextTrimming="CharacterEllipsis"
+                                                   MaxWidth="320" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Browse Button -->
+                            <Button Grid.Column="2" 
+                                    Content="Browse PDF" 
+                                    Style="{StaticResource ModernSecondaryButtonStyle}"
+                                    Command="{Binding SelectPdfCommand}" 
+                                    IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}"
+                                    VerticalAlignment="Center"
+                                    Margin="12,0,0,0" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Right: Preset Selection Card -->
+                    <Border Grid.Column="2"
+                            Background="#F9FAFB" 
+                            BorderBrush="#E5E7EB" 
+                            BorderThickness="1" 
+                            CornerRadius="10" 
+                            Padding="16,12">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="COMPRESSION LEVEL" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" Margin="0,0,0,6" />
+                                <ComboBox ItemsSource="{Binding AvailablePresets}" 
+                                          SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
+                                          Style="{StaticResource ModernComboBoxStyle}"
+                                          IsEnabled="{Binding IsConverting, Converter={StaticResource InvBool}}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Row 2: Compression Metrics Container -->
+                <Border Grid.Row="2"
+                        Background="#FFFFFF" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="24" 
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <!-- Empty State -->
+                        <StackPanel HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center" 
+                                    Visibility="{Binding HasSelectedPdf, Converter={StaticResource InvBoolToVis}}"
+                                    d:Visibility="Visible">
+                            <Border Background="#F3F4F6" CornerRadius="24" Width="44" Height="44" Margin="0,0,0,10" HorizontalAlignment="Center">
+                                <Path Width="20" Height="20" Stretch="Uniform"
+                                      Data="M 4 14 L 12 6 L 20 14 M 12 6 L 12 18"
+                                      Stroke="#9CA3AF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Border>
+                            <TextBlock Text="No PDF document selected" 
+                                       FontSize="14" 
+                                       FontWeight="SemiBold" 
+                                       Foreground="#374151" 
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="Select a PDF above or drag and drop a file to compress" 
+                                       FontSize="12" 
+                                       Foreground="#9CA3AF" 
+                                       Margin="0,3,0,0" 
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <!-- Loaded State: 3 Metrics Cards -->
+                        <StackPanel Visibility="{Binding HasSelectedPdf, Converter={StaticResource BoolToVis}}"
+                                    d:Visibility="Collapsed"
+                                    VerticalAlignment="Center" 
+                                    HorizontalAlignment="Center" 
+                                    MaxWidth="680">
+                            <!-- 3 Stats Columns -->
+                            <Border Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="10" Padding="24,20" Margin="0,0,0,14">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="1" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="1" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Stat 1: Original Size -->
+                                    <StackPanel Grid.Column="0" Margin="10,0">
+                                        <TextBlock Text="ORIGINAL SIZE" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                        <TextBlock Text="{Binding OriginalSizeText}" FontSize="18" FontWeight="Bold" Foreground="#111827" Margin="0,4,0,0" />
+                                    </StackPanel>
+
+                                    <Border Grid.Column="1" Background="#E5E7EB" Width="1" VerticalAlignment="Stretch" Margin="0,2" />
+
+                                    <!-- Stat 2: Compressed Size -->
+                                    <StackPanel Grid.Column="2" Margin="20,0,10,0">
+                                        <TextBlock Text="COMPRESSED SIZE" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                        <TextBlock Text="{Binding CompressedSizeText, TargetNullValue='Pending'}" 
+                                                   FontSize="18" FontWeight="Bold" Foreground="#2563EB" Margin="0,4,0,0" />
+                                    </StackPanel>
+
+                                    <Border Grid.Column="3" Background="#E5E7EB" Width="1" VerticalAlignment="Stretch" Margin="0,2" />
+
+                                    <!-- Stat 3: Space Saved -->
+                                    <StackPanel Grid.Column="4" Margin="20,0,10,0">
+                                        <TextBlock Text="SPACE SAVED" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                        <TextBlock Text="{Binding SavedPercentageText, TargetNullValue='Ready'}" 
+                                                   FontSize="18" FontWeight="Bold" Foreground="#16A34A" Margin="0,4,0,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Tip: The compressed file will be created as a new document; your original source PDF remains untouched." 
+                                       FontSize="12" Foreground="#9CA3AF" TextAlignment="Center" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Row 3: Pinned Bottom Action Bar / Footer -->
+                <Grid Grid.Row="3" Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Status Indicator -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="#DCFCE7" CornerRadius="12" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center">
+                            <Path Width="12" Height="12" Stretch="Uniform"
+                                  Data="M 4 12 L 9 17 L 20 6"
+                                  Stroke="#16A34A" StrokeThickness="2.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="13" FontWeight="SemiBold" Foreground="#111827" />
+                            <TextBlock Text="{Binding ProgressPercentage, StringFormat='{}Progress: {0:F0}%'}" 
+                                       FontSize="11" Foreground="#6B7280"
+                                       Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                       d:Visibility="Collapsed" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Right: Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="Cancel" 
+                                Style="{StaticResource ModernSecondaryButtonStyle}"
+                                Command="{Binding CancelCommand}" 
+                                Visibility="{Binding IsConverting, Converter={StaticResource BoolToVis}}"
+                                d:Visibility="Collapsed"
+                                Margin="0,0,12,0" 
+                                Padding="16,10" />
+
+                        <Button Content="Convert" 
+                                Style="{StaticResource ModernDarkButtonStyle}"
+                                Command="{Binding ConvertCommand}" 
+                                IsEnabled="{Binding CanCompress}" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- ================= PAGE 7: ABOUT ================= -->
+        <Grid Visibility="{Binding IsAboutActive, Converter={StaticResource BoolToVis}}"
+              d:Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" MaxWidth="680" Width="680">
+                <!-- Centered Header without Icon -->
+                <StackPanel HorizontalAlignment="Center" Margin="0,4,0,24">
+                    <TextBlock Text="About Anchor PDF" 
+                               FontSize="24" 
+                               FontWeight="Bold" 
+                               Foreground="#111827" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Modern, high-performance two-way PDF and image conversion utility for Windows." 
+                               FontSize="13" 
+                               Foreground="#6B7280" 
+                               TextAlignment="Center" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- About Card -->
+                <Border Background="#F9FAFB" 
+                        BorderBrush="#E5E7EB" 
+                        BorderThickness="1" 
+                        CornerRadius="10" 
+                        Padding="28,24" 
+                        Margin="0,0,0,20">
+                    <StackPanel>
+                        <!-- App Identity -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,16">
+                            <Image Source="/Assets/AppIcon.png" Width="38" Height="38" Margin="0,0,12,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Anchor PDF" FontSize="16" FontWeight="Bold" Foreground="#111827" />
+                                <TextBlock Text="Version 1.0.0" FontSize="12" Foreground="#6B7280" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <TextBlock Text="Fast, offline desktop utility for two-way PDF conversion, merging, splitting, visual page reorganization, and file size optimization."
+                                   FontSize="13" Foreground="#374151" LineHeight="20" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,18" />
+
+                        <Separator Background="#E5E7EB" Margin="0,0,0,18" />
+
+                        <!-- Specifications Grid -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="12,0">
+                                <TextBlock Text="CORE MODULES" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                <TextBlock Text="PDF to Images, Images to PDF, Merge, Split, Reorganize, Compress" FontSize="13" FontWeight="Medium" Foreground="#111827" Margin="0,3,0,14" TextWrapping="Wrap" />
+
+                                <TextBlock Text="SUPPORTED FORMATS" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                <TextBlock Text="PDF, PNG, JPEG, WebP, BMP" FontSize="13" FontWeight="Medium" Foreground="#111827" Margin="0,3,0,0" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="12,0">
+                                <TextBlock Text="DOCUMENT LAYOUTS" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                <TextBlock Text="Fit to Image, A4, US Letter" FontSize="13" FontWeight="Medium" Foreground="#111827" Margin="0,3,0,14" />
+
+                                <TextBlock Text="ARCHITECTURE" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                <TextBlock Text="64-bit Windows (x64)" FontSize="13" FontWeight="Medium" Foreground="#111827" Margin="0,3,0,14" />
+
+                                <TextBlock Text="PROCESSING" FontSize="11" FontWeight="SemiBold" Foreground="#6B7280" />
+                                <TextBlock Text="100% Offline &amp; Private" FontSize="13" FontWeight="Medium" Foreground="#111827" Margin="0,3,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        </Grid>
+    </Grid>
+</Window>
