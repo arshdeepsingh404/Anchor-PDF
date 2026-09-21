@@ -11,6 +11,7 @@
             <converters:EqualityToVisibilityConverter x:Key="EqualToVis" />
             <converters:EqualityToBooleanConverter x:Key="EqualToBool" />
             <converters:NullToVisibilityConverter x:Key="NullToVis" />
+            <converters:EnumToDisplayNameConverter x:Key="EnumToDisplayName" />
 
             <!-- Base Sidebar Nav Button Style -->
             <Style x:Key="SidebarNavButtonStyle" TargetType="Button">
@@ -129,7 +130,8 @@
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="FontSize" Value="13" />
                 <Setter Property="FontWeight" Value="SemiBold" />
-                <Setter Property="Padding" Value="24,11" />
+                <Setter Property="Padding" Value="28,11" />
+                <Setter Property="MinWidth" Value="180" />
                 <Setter Property="Cursor" Value="Hand" />
                 <Setter Property="Template">
                     <Setter.Value>
@@ -164,6 +166,31 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <!-- Modern Minimalist Progress Fill Bar Style -->
+            <Style x:Key="ModernProgressBarStyle" TargetType="ProgressBar">
+                <Setter Property="Height" Value="6" />
+                <Setter Property="Background" Value="#E5E7EB" />
+                <Setter Property="Foreground" Value="#2563EB" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ProgressBar">
+                            <Border x:Name="PART_Track"
+                                    Background="{TemplateBinding Background}"
+                                    CornerRadius="3"
+                                    SnapsToDevicePixels="True">
+                                <Border x:Name="PART_Indicator"
+                                        HorizontalAlignment="Left"
+                                        Background="{TemplateBinding Foreground}"
+                                        CornerRadius="3"
+                                        SnapsToDevicePixels="True" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style TargetType="ProgressBar" BasedOn="{StaticResource ModernProgressBarStyle}" />
 
             <!-- Modern Secondary Action Button Style (Toolbar / Subtle) -->
             <Style x:Key="ModernSecondaryButtonStyle" TargetType="Button">

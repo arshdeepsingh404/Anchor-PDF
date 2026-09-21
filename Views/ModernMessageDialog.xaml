@@ -1,0 +1,186 @@
+<Window x:Class="Anchor_PDF.Views.ModernMessageDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Width="480"
+        SizeToContent="Height"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        FontFamily="Segoe UI"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+
+    <Window.Resources>
+        <DropShadowEffect x:Key="DialogShadow"
+                          BlurRadius="28"
+                          ShadowDepth="6"
+                          Direction="270"
+                          Color="#000000"
+                          Opacity="0.14" />
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Border Background="#FFFFFF"
+                BorderBrush="#E5E7EB"
+                BorderThickness="1"
+                CornerRadius="12"
+                Effect="{StaticResource DialogShadow}"
+                Padding="28,24">
+            <Grid>
+                <!-- Top Right Close Button -->
+                <Button x:Name="CloseButton"
+                        Width="32" Height="32"
+                        Cursor="Hand"
+                        Click="CloseButton_Click"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Margin="0,-6,-10,0"
+                        IsCancel="True">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6">
+                                <Path Width="10" Height="10" Stretch="Uniform"
+                                      Data="M 4 4 L 16 16 M 4 16 L 16 4"
+                                      Stroke="#9CA3AF" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#F3F4F6" />
+                                    <Setter Property="Foreground" Value="#111827" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <!-- Dialog Content Stack -->
+                <StackPanel>
+                    <!-- Success Icon Badge -->
+                    <Border x:Name="SuccessBadge"
+                            Background="#DCFCE7"
+                            CornerRadius="24"
+                            Width="48" Height="48"
+                            HorizontalAlignment="Center"
+                            Margin="0,4,0,16">
+                        <Path Width="20" Height="20" Stretch="Uniform"
+                              Data="M 4 12 L 9 17 L 20 6"
+                              Stroke="#16A34A" StrokeThickness="2.4"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                    </Border>
+
+                    <!-- Error Icon Badge -->
+                    <Border x:Name="ErrorBadge"
+                            Background="#FEE2E2"
+                            CornerRadius="24"
+                            Width="48" Height="48"
+                            HorizontalAlignment="Center"
+                            Margin="0,4,0,16"
+                            Visibility="Collapsed">
+                        <Path Width="18" Height="18" Stretch="Uniform"
+                              Data="M 6 6 L 18 18 M 6 18 L 18 6"
+                              Stroke="#DC2626" StrokeThickness="2.4"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                    </Border>
+
+                    <!-- Title -->
+                    <TextBlock x:Name="TitleText"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="#111827"
+                               TextAlignment="Center"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,8" />
+
+                    <!-- Message / Description -->
+                    <TextBlock x:Name="MessageText"
+                               FontSize="13"
+                               Foreground="#4B5563"
+                               TextAlignment="Center"
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap"
+                               LineHeight="20"
+                               Margin="0,0,0,18" />
+
+                    <!-- Destination File/Folder Card (Optional) -->
+                    <Border x:Name="PathCard"
+                            Background="#F9FAFB"
+                            BorderBrush="#E5E7EB"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="14,10"
+                            Margin="0,0,0,20"
+                            Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Document / File Icon -->
+                            <Border x:Name="FileIconContainer" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
+                                <Path Width="18" Height="18" Stretch="Uniform"
+                                      Data="M 6 2 C 4.8954 2 4 2.8954 4 4 L 4 20 C 4 21.1046 4.8954 22 6 22 L 18 22 C 19.1046 22 20 21.1046 20 20 L 20 8 L 14 2 L 6 2 Z M 13 3.5 L 18.5 9 L 13 9 L 13 3.5 Z"
+                                      Stroke="#2563EB" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeLineJoin="Round" Fill="#EFF6FF" />
+                            </Border>
+
+                            <!-- Folder Icon (Alternative) -->
+                            <Border x:Name="FolderIconContainer" Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0" Visibility="Collapsed">
+                                <Path Width="18" Height="18" Stretch="Uniform"
+                                      Data="M 3 4 C 3 3.4477 3.4477 3 4 3 L 9.5858 3 C 9.851 3 10.1054 3.1054 10.2929 3.2929 L 12.7071 5.7071 C 12.8946 5.8946 13.149 6 13.4142 6 L 20 6 C 20.5523 6 21 6.4477 21 7 L 21 19 C 21 19.5523 20.5523 20 20 20 L 4 20 C 3.4477 20 3 19.5523 3 19 L 3 4 Z"
+                                      Stroke="#2563EB" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeLineJoin="Round" Fill="#EFF6FF" />
+                            </Border>
+
+                            <!-- Details -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="FileNameText"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           Foreground="#111827"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock x:Name="FullPathText"
+                                           FontSize="11"
+                                           Foreground="#6B7280"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Buttons Row -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <!-- Open Folder Button -->
+                        <Button x:Name="OpenFolderButton"
+                                Style="{StaticResource ModernPrimaryButtonStyle}"
+                                Click="OpenFolderButton_Click"
+                                Margin="0,0,10,0"
+                                Padding="16,9"
+                                Visibility="Collapsed"
+                                Cursor="Hand">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0"
+                                      Data="M 3 4 C 3 3.4477 3.4477 3 4 3 L 9.5858 3 C 9.851 3 10.1054 3.1054 10.2929 3.2929 L 12.7071 5.7071 C 12.8946 5.8946 13.149 6 13.4142 6 L 20 6 C 20.5523 6 21 6.4477 21 7 L 21 19 C 21 19.5523 20.5523 20 20 20 L 4 20 C 3.4477 20 3 19.5523 3 19 L 3 4 Z"
+                                      Stroke="#374151" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" />
+                                <TextBlock Text="Open Folder" FontSize="12" FontWeight="SemiBold" Foreground="#111827" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Done / OK Button -->
+                        <Button x:Name="DoneButton"
+                                Content="Done"
+                                Style="{StaticResource ModernDarkButtonStyle}"
+                                Click="DoneButton_Click"
+                                MinWidth="130"
+                                Padding="20,9"
+                                IsDefault="True" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

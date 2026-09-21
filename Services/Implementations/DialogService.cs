@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows;
+using Anchor_PDF.Views;
 using Microsoft.Win32;
 
 namespace Anchor_PDF.Services.Implementations;
@@ -75,27 +76,57 @@ public class DialogService : IDialogService
 
     public void ShowMessage(string title, string message)
     {
-        Window? owner = Application.Current?.MainWindow;
-        if (owner != null)
+        void DisplayDialog()
         {
-            MessageBox.Show(owner, message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+            Window? owner = Application.Current?.MainWindow;
+            ModernMessageDialog dialog = new ModernMessageDialog(title, message, isError: false);
+            if (owner != null && owner.IsVisible && owner.WindowState != WindowState.Minimized)
+            {
+                dialog.Owner = owner;
+            }
+            else
+            {
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            }
+
+            dialog.ShowDialog();
+        }
+
+        if (Application.Current?.Dispatcher.CheckAccess() == true)
+        {
+            DisplayDialog();
         }
         else
         {
-            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+            Application.Current?.Dispatcher.Invoke(DisplayDialog);
         }
     }
 
     public void ShowError(string title, string error)
     {
-        Window? owner = Application.Current?.MainWindow;
-        if (owner != null)
+        void DisplayDialog()
         {
-            MessageBox.Show(owner, error, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            Window? owner = Application.Current?.MainWindow;
+            ModernMessageDialog dialog = new ModernMessageDialog(title, error, isError: true);
+            if (owner != null && owner.IsVisible && owner.WindowState != WindowState.Minimized)
+            {
+                dialog.Owner = owner;
+            }
+            else
+            {
+                dialog.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            }
+
+            dialog.ShowDialog();
+        }
+
+        if (Application.Current?.Dispatcher.CheckAccess() == true)
+        {
+            DisplayDialog();
         }
         else
         {
-            MessageBox.Show(error, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            Application.Current?.Dispatcher.Invoke(DisplayDialog);
         }
     }
 

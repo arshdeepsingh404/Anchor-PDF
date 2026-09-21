@@ -13,7 +13,6 @@ public partial class MainViewModel : ObservableObject
     public MergePdfViewModel MergePdf { get; }
     public SplitPdfViewModel SplitPdf { get; }
     public ReorganizePdfViewModel ReorganizePdf { get; }
-    public CompressPdfViewModel CompressPdf { get; }
 
     public MainViewModel()
     {
@@ -23,14 +22,12 @@ public partial class MainViewModel : ObservableObject
         PdfMergeService pdfMergeService = new PdfMergeService();
         PdfSplitService pdfSplitService = new PdfSplitService();
         PdfReorganizeService pdfReorganizeService = new PdfReorganizeService();
-        PdfCompressService pdfCompressService = new PdfCompressService();
 
         PdfToImage = new PdfToImageViewModel(pdfToImageService, dialogService);
         ImageToPdf = new ImageToPdfViewModel(imageToPdfService, dialogService);
         MergePdf = new MergePdfViewModel(pdfMergeService, dialogService);
-        SplitPdf = new SplitPdfViewModel(pdfSplitService, dialogService);
+        SplitPdf = new SplitPdfViewModel(pdfSplitService, pdfToImageService, dialogService);
         ReorganizePdf = new ReorganizePdfViewModel(pdfReorganizeService, pdfToImageService, dialogService);
-        CompressPdf = new CompressPdfViewModel(pdfCompressService, dialogService);
 
         CurrentPage = "PdfToImage";
     }
@@ -45,7 +42,6 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsMergePdfActive))]
     [NotifyPropertyChangedFor(nameof(IsSplitPdfActive))]
     [NotifyPropertyChangedFor(nameof(IsReorganizePdfActive))]
-    [NotifyPropertyChangedFor(nameof(IsCompressPdfActive))]
     [NotifyPropertyChangedFor(nameof(IsAboutActive))]
     private string _currentPage = "PdfToImage";
 
@@ -54,7 +50,6 @@ public partial class MainViewModel : ObservableObject
     public bool IsMergePdfActive => CurrentPage == "MergePdf";
     public bool IsSplitPdfActive => CurrentPage == "SplitPdf";
     public bool IsReorganizePdfActive => CurrentPage == "ReorganizePdf";
-    public bool IsCompressPdfActive => CurrentPage == "CompressPdf";
     public bool IsAboutActive => CurrentPage == "About";
 
     #endregion

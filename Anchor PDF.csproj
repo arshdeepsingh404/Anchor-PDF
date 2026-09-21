@@ -8,7 +8,6 @@
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <!-- In Debug, use AnyCPU (runs 64-bit on x64 Windows) so Visual Studio XAML Designer can load custom elements -->
@@ -32,12 +31,6 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="PDFtoImage" Version="5.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Sample WPF Project\**" />
-    <Page Remove="Sample WPF Project\**" />
-    <None Remove="Sample WPF Project\**" />
   </ItemGroup>
 
 </Project>

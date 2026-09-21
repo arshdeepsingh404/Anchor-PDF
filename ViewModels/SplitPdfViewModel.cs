@@ -1,4 +1,8 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Anchor_PDF.Models;
 using Anchor_PDF.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,15 +15,25 @@ public partial class SplitPdfViewModel : ObservableObject
     #region Fields and Constructor
 
     private readonly IPdfSplitService _pdfSplitService;
+    private readonly IPdfToImageService _pdfToImageService;
     private readonly IDialogService _dialogService;
-    private CancellationTokenSource? _cts;
+    private CancellationTokenSource? _conversionCts;
+    private CancellationTokenSource? _thumbnailCts;
+    private Guid _currentDocumentSessionId = Guid.Empty;
+    private bool _isUpdatingInternally;
+
+    public ObservableCollection<PdfPageItem> Pages { get; } = [];
 
     public IReadOnlyList<SplitMode> AvailableSplitModes { get; } = 
-        [SplitMode.AllPages, SplitMode.CustomRange, SplitMode.FixedInterval];
+        [SplitMode.AllPages, SplitMode.CustomRange];
 
-    public SplitPdfViewModel(IPdfSplitService pdfSplitService, IDialogService dialogService)
+    public SplitPdfViewModel(
+        IPdfSplitService pdfSplitService, 
+        IPdfToImageService pdfToImageService, 
+        IDialogService dialogService)
     {
         _pdfSplitService = pdfSplitService;
+        _pdfToImageService = pdfToImageService;
         _dialogService = dialogService;
     }
 
@@ -43,20 +57,23 @@ public partial class SplitPdfViewModel : ObservableObject
     private int _totalPages;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSplit))]
+    private int _selectedPageCount;
+
+    [ObservableProperty]
+    private bool _hasPages;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsAllPagesMode))]
     [NotifyPropertyChangedFor(nameof(IsCustomRangeMode))]
-    [NotifyPropertyChangedFor(nameof(IsFixedIntervalMode))]
+    [NotifyPropertyChangedFor(nameof(CanSplit))]
     private SplitMode _selectedSplitMode = SplitMode.AllPages;
 
     public bool IsAllPagesMode => SelectedSplitMode == SplitMode.AllPages;
     public bool IsCustomRangeMode => SelectedSplitMode == SplitMode.CustomRange;
-    public bool IsFixedIntervalMode => SelectedSplitMode == SplitMode.FixedInterval;
 
     [ObservableProperty]
-    private string _rangeExpression = "1-3";
-
-    [ObservableProperty]
-    private int _pagesPerChunk = 2;
+    private string _rangeExpression = "1";
 
     [ObservableProperty]
     private bool _combineIntoSingleFile = true;
@@ -71,7 +88,29 @@ public partial class SplitPdfViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(CanSplit))]
     private bool _isConverting;
 
-    public bool CanSplit => HasSelectedPdf && !IsConverting;
+    public bool CanSplit => HasSelectedPdf && !IsConverting && (IsAllPagesMode ? TotalPages > 0 : SelectedPageCount > 0);
+
+    #endregion
+
+    #region Property Change Handlers
+
+    partial void OnRangeExpressionChanged(string value)
+    {
+        if (_isUpdatingInternally || Pages.Count == 0)
+        {
+            return;
+        }
+
+        SyncSelectionFromRange(value);
+    }
+
+    partial void OnSelectedSplitModeChanged(SplitMode value)
+    {
+        if (value == SplitMode.AllPages && Pages.Count > 0)
+        {
+            SelectAllPages();
+        }
+    }
 
     #endregion
 
@@ -87,28 +126,43 @@ public partial class SplitPdfViewModel : ObservableObject
         }
     }
 
-    public async Task SetSelectedPdfAsync(string filePath)
+    [RelayCommand]
+    private void SelectAllPages()
     {
-        if (!File.Exists(filePath) || !filePath.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+        _isUpdatingInternally = true;
+        foreach (PdfPageItem page in Pages)
         {
-            _dialogService.ShowError("Invalid File", "Please select a valid PDF file.");
+            page.IsSelected = true;
+        }
+
+        RangeExpression = TotalPages > 1 ? $"1-{TotalPages}" : "1";
+        _isUpdatingInternally = false;
+        UpdateCounts();
+    }
+
+    [RelayCommand]
+    private void DeselectAllPages()
+    {
+        _isUpdatingInternally = true;
+        foreach (PdfPageItem page in Pages)
+        {
+            page.IsSelected = false;
+        }
+
+        RangeExpression = string.Empty;
+        _isUpdatingInternally = false;
+        UpdateCounts();
+    }
+
+    [RelayCommand]
+    private void TogglePageSelection(PdfPageItem? item)
+    {
+        if (item == null)
+        {
             return;
         }
 
-        SelectedPdfPath = filePath;
-        StatusMessage = "Reading PDF page count...";
-
-        try
-        {
-            TotalPages = await _pdfSplitService.GetPageCountAsync(filePath);
-            RangeExpression = TotalPages > 1 ? $"1-{Math.Min(3, TotalPages)}" : "1";
-            StatusMessage = $"Loaded {PdfFileName} ({TotalPages} pages). Ready to split.";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = "Error reading PDF.";
-            _dialogService.ShowError("PDF Read Error", ex.Message);
-        }
+        item.IsSelected = !item.IsSelected;
     }
 
     [RelayCommand]
@@ -129,6 +183,14 @@ public partial class SplitPdfViewModel : ObservableObject
             return;
         }
 
+        if (IsCustomRangeMode && SelectedPageCount == 0)
+        {
+            _dialogService.ShowError("Validation Error", "Please select at least one page to extract.");
+            return;
+        }
+
+        CancelThumbnailGeneration();
+
         string? destinationFolder = _dialogService.ShowFolderBrowserDialog("Select Destination Folder for Split PDF Files");
         if (string.IsNullOrEmpty(destinationFolder))
         {
@@ -138,7 +200,7 @@ public partial class SplitPdfViewModel : ObservableObject
         IsConverting = true;
         ProgressPercentage = 0;
         StatusMessage = "Preparing to split PDF...";
-        _cts = new CancellationTokenSource();
+        _conversionCts = new CancellationTokenSource();
 
         Progress<ConversionProgress> progress = new Progress<ConversionProgress>(p =>
         {
@@ -155,7 +217,7 @@ public partial class SplitPdfViewModel : ObservableObject
                         SelectedPdfPath,
                         destinationFolder,
                         progress,
-                        _cts.Token);
+                        _conversionCts.Token);
                     break;
 
                 case SplitMode.CustomRange:
@@ -165,16 +227,7 @@ public partial class SplitPdfViewModel : ObservableObject
                         RangeExpression,
                         CombineIntoSingleFile,
                         progress,
-                        _cts.Token);
-                    break;
-
-                case SplitMode.FixedInterval:
-                    await _pdfSplitService.SplitEveryNPagesAsync(
-                        SelectedPdfPath,
-                        destinationFolder,
-                        PagesPerChunk,
-                        progress,
-                        _cts.Token);
+                        _conversionCts.Token);
                     break;
             }
 
@@ -194,18 +247,284 @@ public partial class SplitPdfViewModel : ObservableObject
         finally
         {
             IsConverting = false;
-            _cts?.Dispose();
-            _cts = null;
+            _conversionCts?.Dispose();
+            _conversionCts = null;
         }
     }
 
     [RelayCommand]
     private void Cancel()
     {
-        if (_cts != null && !_cts.IsCancellationRequested)
+        if (_conversionCts != null && !_conversionCts.IsCancellationRequested)
         {
             StatusMessage = "Cancelling split operation...";
-            _cts.Cancel();
+            _conversionCts.Cancel();
+        }
+    }
+
+    #endregion
+
+    #region Public Methods
+
+    /// <summary>
+    /// Loads the chosen PDF, parses total page count, creates card placeholders, and loads thumbnails asynchronously.
+    /// </summary>
+    public async Task SetSelectedPdfAsync(string filePath)
+    {
+        if (!File.Exists(filePath) || !filePath.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            _dialogService.ShowError("Invalid File", "Please select a valid PDF file.");
+            return;
+        }
+
+        CancelThumbnailGeneration();
+        _thumbnailCts = new CancellationTokenSource();
+        CancellationToken cancellationToken = _thumbnailCts.Token;
+
+        Guid sessionId = Guid.NewGuid();
+        _currentDocumentSessionId = sessionId;
+
+        SelectedPdfPath = filePath;
+        StatusMessage = "Reading PDF page count...";
+
+        try
+        {
+            TotalPages = await _pdfSplitService.GetPageCountAsync(filePath, cancellationToken);
+            if (sessionId != _currentDocumentSessionId || cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            ClearPages();
+
+            _isUpdatingInternally = true;
+            for (int i = 1; i <= TotalPages; i++)
+            {
+                PdfPageItem pageItem = new PdfPageItem
+                {
+                    PageNumber = i,
+                    IsSelected = true,
+                    IsLoading = true
+                };
+
+                pageItem.PropertyChanged += PageItem_PropertyChanged;
+                Pages.Add(pageItem);
+            }
+
+            RangeExpression = TotalPages > 1 ? $"1-{TotalPages}" : "1";
+            _isUpdatingInternally = false;
+
+            HasPages = Pages.Count > 0;
+            UpdateCounts();
+            StatusMessage = $"Loaded {PdfFileName} ({TotalPages} pages). Ready to split.";
+
+            StartThumbnailStreaming(filePath, TotalPages, sessionId, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected cancellation
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Error reading PDF.";
+            _dialogService.ShowError("PDF Read Error", ex.Message);
+        }
+    }
+
+    #endregion
+
+    #region Private Helper Methods
+
+    private void StartThumbnailStreaming(string filePath, int totalPageCount, Guid sessionId, CancellationToken cancellationToken)
+    {
+        _ = Task.Run(async () =>
+        {
+            for (int pageNumber = 1; pageNumber <= totalPageCount; pageNumber++)
+            {
+                if (cancellationToken.IsCancellationRequested || sessionId != _currentDocumentSessionId)
+                {
+                    break;
+                }
+
+                BitmapSource? thumbnail = null;
+                try
+                {
+                    thumbnail = await _pdfToImageService.RenderPageThumbnailAsync(filePath, pageNumber, 50, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch
+                {
+                    // Continue rendering remaining pages if a single page fails
+                }
+
+                if (thumbnail != null && !cancellationToken.IsCancellationRequested && sessionId == _currentDocumentSessionId)
+                {
+                    int currentPageNumber = pageNumber;
+                    BitmapSource frozenThumbnail = thumbnail;
+
+                    App.Current?.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (cancellationToken.IsCancellationRequested || sessionId != _currentDocumentSessionId)
+                        {
+                            return;
+                        }
+
+                        int index = currentPageNumber - 1;
+                        if (index >= 0 && index < Pages.Count)
+                        {
+                            PdfPageItem pageItem = Pages[index];
+                            if (pageItem.PageNumber == currentPageNumber)
+                            {
+                                pageItem.Thumbnail = frozenThumbnail;
+                                pageItem.PixelWidth = frozenThumbnail.PixelWidth;
+                                pageItem.PixelHeight = frozenThumbnail.PixelHeight;
+                                pageItem.IsLoading = false;
+                            }
+                        }
+                    }, DispatcherPriority.Background);
+                }
+
+                try
+                {
+                    await Task.Delay(20, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }, cancellationToken);
+    }
+
+    private void CancelThumbnailGeneration()
+    {
+        if (_thumbnailCts != null)
+        {
+            try
+            {
+                if (!_thumbnailCts.IsCancellationRequested)
+                {
+                    _thumbnailCts.Cancel();
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Already disposed
+            }
+            _thumbnailCts = null;
+        }
+    }
+
+    private void ClearPages()
+    {
+        foreach (PdfPageItem item in Pages)
+        {
+            item.PropertyChanged -= PageItem_PropertyChanged;
+        }
+        Pages.Clear();
+    }
+
+    private void PageItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(PdfPageItem.IsSelected) && !_isUpdatingInternally)
+        {
+            SyncRangeFromSelection();
+        }
+    }
+
+    private void SyncRangeFromSelection()
+    {
+        List<int> selectedPages = Pages
+            .Where(p => p.IsSelected)
+            .Select(p => p.PageNumber)
+            .OrderBy(p => p)
+            .ToList();
+
+        if (SelectedSplitMode == SplitMode.AllPages && selectedPages.Count < TotalPages)
+        {
+            SelectedSplitMode = SplitMode.CustomRange;
+        }
+
+        _isUpdatingInternally = true;
+        RangeExpression = BuildRangeExpression(selectedPages);
+        _isUpdatingInternally = false;
+
+        UpdateCounts();
+    }
+
+    private void SyncSelectionFromRange(string rangeString)
+    {
+        List<int> validPages = _pdfToImageService.ParsePageRange(rangeString, TotalPages);
+        HashSet<int> selectedSet = new HashSet<int>(validPages);
+
+        _isUpdatingInternally = true;
+        foreach (PdfPageItem page in Pages)
+        {
+            page.IsSelected = selectedSet.Contains(page.PageNumber);
+        }
+        _isUpdatingInternally = false;
+
+        UpdateCounts();
+    }
+
+    private static string BuildRangeExpression(List<int> sortedPages)
+    {
+        if (sortedPages.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        List<string> ranges = [];
+        int rangeStart = sortedPages[0];
+        int previous = sortedPages[0];
+
+        for (int i = 1; i < sortedPages.Count; i++)
+        {
+            int current = sortedPages[i];
+            if (current == previous + 1)
+            {
+                previous = current;
+                continue;
+            }
+
+            if (rangeStart == previous)
+            {
+                ranges.Add(rangeStart.ToString());
+            }
+            else
+            {
+                ranges.Add($"{rangeStart}-{previous}");
+            }
+
+            rangeStart = current;
+            previous = current;
+        }
+
+        if (rangeStart == previous)
+        {
+            ranges.Add(rangeStart.ToString());
+        }
+        else
+        {
+            ranges.Add($"{rangeStart}-{previous}");
+        }
+
+        return string.Join(", ", ranges);
+    }
+
+    private void UpdateCounts()
+    {
+        SelectedPageCount = Pages.Count(p => p.IsSelected);
+        if (IsAllPagesMode)
+        {
+            StatusMessage = $"All {TotalPages} pages will be extracted individually.";
+        }
+        else
+        {
+            StatusMessage = $"{SelectedPageCount} of {TotalPages} page(s) selected for extraction.";
         }
     }
 

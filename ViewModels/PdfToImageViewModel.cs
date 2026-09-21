@@ -25,7 +25,7 @@ public partial class PdfToImageViewModel : ObservableObject
     public IReadOnlyList<ImageFormatType> AvailableFormats { get; } = 
         [ImageFormatType.PNG, ImageFormatType.JPEG, ImageFormatType.WEBP];
 
-    public IReadOnlyList<int> AvailableDpiList { get; } = [96, 150, 300];
+    public IReadOnlyList<int> AvailableDpiList { get; } = [96, 150, 300, 600, 1200];
 
     public PdfToImageViewModel(IPdfToImageService pdfToImageService, IDialogService dialogService)
     {

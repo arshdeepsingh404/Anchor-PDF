@@ -110,14 +110,6 @@ public partial class MainWindow : Window
                     await viewModel.ReorganizePdf.SetSelectedPdfAsync(pdfFile);
                 }
             }
-            else if (viewModel.IsCompressPdfActive)
-            {
-                string? pdfFile = droppedEntries.FirstOrDefault(entry => entry.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase));
-                if (!string.IsNullOrEmpty(pdfFile) && File.Exists(pdfFile))
-                {
-                    await viewModel.CompressPdf.SetSelectedPdfAsync(pdfFile);
-                }
-            }
         }
         catch (Exception ex)
         {

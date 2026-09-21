@@ -52,7 +52,14 @@ public partial class ReorganizePdfViewModel : ObservableObject
     private int _totalPages;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedPage))]
+    [NotifyPropertyChangedFor(nameof(CanMoveLeft))]
+    [NotifyPropertyChangedFor(nameof(CanMoveRight))]
     private ReorganizePageItem? _selectedPage;
+
+    public bool HasSelectedPage => SelectedPage != null && !IsConverting;
+    public bool CanMoveLeft => SelectedPage != null && Pages.IndexOf(SelectedPage) > 0 && !IsConverting;
+    public bool CanMoveRight => SelectedPage != null && Pages.IndexOf(SelectedPage) >= 0 && Pages.IndexOf(SelectedPage) < Pages.Count - 1 && !IsConverting;
 
     [ObservableProperty]
     private string _statusMessage = "Ready";
@@ -62,6 +69,9 @@ public partial class ReorganizePdfViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanConvert))]
+    [NotifyPropertyChangedFor(nameof(HasSelectedPage))]
+    [NotifyPropertyChangedFor(nameof(CanMoveLeft))]
+    [NotifyPropertyChangedFor(nameof(CanMoveRight))]
     private bool _isConverting;
 
     public bool CanConvert => Pages.Count > 0 && !IsConverting;
@@ -122,6 +132,11 @@ public partial class ReorganizePdfViewModel : ObservableObject
                 Pages.Add(pageItem);
             }
 
+            if (Pages.Count > 0)
+            {
+                SelectPageItem(Pages[0]);
+            }
+
             OnPropertyChanged(nameof(CanConvert));
             StatusMessage = $"Loaded {PdfFileName} ({TotalPages} pages). Select pages to rotate or reorder.";
 
@@ -153,6 +168,9 @@ public partial class ReorganizePdfViewModel : ObservableObject
 
         item.IsSelected = true;
         SelectedPage = item;
+        OnPropertyChanged(nameof(CanMoveLeft));
+        OnPropertyChanged(nameof(CanMoveRight));
+        OnPropertyChanged(nameof(HasSelectedPage));
     }
 
     [RelayCommand]
@@ -201,6 +219,7 @@ public partial class ReorganizePdfViewModel : ObservableObject
         }
 
         item.RotationAngle = (item.RotationAngle + 90) % 360;
+        SelectPageItem(item);
     }
 
     [RelayCommand]
@@ -213,6 +232,7 @@ public partial class ReorganizePdfViewModel : ObservableObject
         }
 
         item.RotationAngle = (item.RotationAngle + 270) % 360;
+        SelectPageItem(item);
     }
 
     [RelayCommand]
@@ -366,6 +386,10 @@ public partial class ReorganizePdfViewModel : ObservableObject
         {
             Pages[i].CurrentOrderIndex = i + 1;
         }
+
+        OnPropertyChanged(nameof(CanMoveLeft));
+        OnPropertyChanged(nameof(CanMoveRight));
+        OnPropertyChanged(nameof(HasSelectedPage));
     }
 
     private void StartThumbnailStreaming(string filePath, int totalPageCount, Guid sessionId, CancellationToken cancellationToken)

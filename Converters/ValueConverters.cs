@@ -78,4 +78,55 @@ public class EqualityToBooleanConverter : IValueConverter
     }
 }
 
+public class EnumToDisplayNameConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value == null)
+        {
+            return string.Empty;
+        }
+
+        if (value is Anchor_PDF.Models.PageSizePreset pageSize)
+        {
+            return pageSize switch
+            {
+                Anchor_PDF.Models.PageSizePreset.FitToImage => "Fit to Image",
+                Anchor_PDF.Models.PageSizePreset.A4 => "A4",
+                Anchor_PDF.Models.PageSizePreset.Letter => "Letter",
+                _ => pageSize.ToString()
+            };
+        }
+
+        if (value is Anchor_PDF.Models.SplitMode splitMode)
+        {
+            return splitMode switch
+            {
+                Anchor_PDF.Models.SplitMode.AllPages => "All Pages",
+                Anchor_PDF.Models.SplitMode.CustomRange => "Custom Range",
+                _ => splitMode.ToString()
+            };
+        }
+
+        if (value is Anchor_PDF.Models.PageOrientationPreset orientation)
+        {
+            return orientation switch
+            {
+                Anchor_PDF.Models.PageOrientationPreset.Auto => "Auto",
+                Anchor_PDF.Models.PageOrientationPreset.Portrait => "Portrait",
+                Anchor_PDF.Models.PageOrientationPreset.Landscape => "Landscape",
+                _ => orientation.ToString()
+            };
+        }
+
+        string rawString = value.ToString() ?? string.Empty;
+        return System.Text.RegularExpressions.Regex.Replace(rawString, "(?<=[a-z])(?=[A-Z])", " ");
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 
