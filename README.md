@@ -4,7 +4,7 @@
 
 Working with PDF documents often requires uploading sensitive personal files, legal contracts, or confidential invoices to online conversion websites with unknown privacy policies and file retention practices. Offline desktop utilities, on the other hand, are frequently bogged down with slow performance, complex multi-step wizards, or intrusive licensing prompts.
 
-Anchor PDF provides a modern, high-speed, 100% offline alternative for 64-bit Windows. All conversions, rasterizations, and document operations happen strictly locally on your computer with zero telemetry and zero server dependencies. Your files remain private, secure, and under your control at all times.
+Anchor PDF provides a modern, high-speed, 100% offline alternative for 64-bit Windows. All conversions, rasterizations, and document operations happen strictly locally on your computer. Your files remain private, secure, and under your control at all times.
 
 &nbsp;
 <p align="center">◈ ◈ ◈</p>
@@ -13,9 +13,15 @@ Anchor PDF provides a modern, high-speed, 100% offline alternative for 64-bit Wi
 ## Application Walkthrough & Features
 
 ### 1. PDF to Images Screen
-Convert document pages into crisp, high-resolution raster images with selective page extraction and instant ZIP packaging.
+Convert document pages into high-resolution raster images with selective page extraction and instant ZIP packaging.
 
-* **Arbitrary High-Resolution Rasterization**: Choose from 96, 150, 300, 600, or 1200 DPI presets for sharp screen previews or fine archival printing.
+&nbsp;
+<p align="center">
+  <img width="700" alt="Anchor PDF - PDF to Image" src="https://github.com/user-attachments/assets/7b259d5c-24d1-4c53-95e9-ab1eaaf397d6" />
+</p>
+&nbsp;
+
+* **High-Resolution Rasterization**: Choose from 96, 150, 300, 600, or 1200 DPI presets for sharp screen previews or fine archival printing.
 * **Format Flexibility**: Export pages directly as PNG (`.png`), JPEG (`.jpg`), or WebP (`.webp`).
 * **Visual Page Selection**: Browse real-time page thumbnails and selectively check or uncheck individual pages, or use Select All and Deselect All.
 * **Direct Image or ZIP Packaging**: Automatically save individual page images or package multiple pages into a consolidated `.zip` archive.
@@ -27,7 +33,13 @@ Convert document pages into crisp, high-resolution raster images with selective 
 ### 2. Images to PDF Screen
 Compile collections of images into clean, structured PDF documents with custom page sizing and orientation controls.
 
-* **Drag-and-Drop Drop Zone**: Drop single or batch image files directly into the window, or browse with standard system dialogs.
+&nbsp;
+<p align="center">
+  <img width="700" alt="Anchor PDF - Image to PDF" src="https://github.com/user-attachments/assets/fb61744f-0757-41cf-bae5-db4ed22deed7" />
+</p>
+
+&nbsp;
+
 * **Standard Image Formats**: Full support for PNG, JPEG, WebP, and BMP images.
 * **Page Layout Presets**: Fit to Image, A4 (Portrait, Landscape, Auto), and Letter (Portrait, Landscape, Auto) with configurable margin point controls.
 * **Sequence Management**: Reorder images, move items up or down, remove items, or clear all before generating the document.
@@ -37,19 +49,30 @@ Compile collections of images into clean, structured PDF documents with custom p
 &nbsp;
 
 ### 3. Merge PDFs Screen
-Consolidate multiple PDF documents into a single organized file with safe stream composition.
+Merge multiple PDF documents into a single organized PDF file.
+
+&nbsp;
+<p align="center">
+  <img width="700" alt="Anchor PDF - Merge PDF" src="https://github.com/user-attachments/assets/4a1da4d0-b986-4525-9523-fb15aa55f334" />
+</p>
+&nbsp;
+<img width="3840" height="2292" alt="Screenshot 4 - Split PDF" src="https://github.com/user-attachments/assets/6b13db7c-d47e-4ead-89b5-dc611b2062e5" />
 
 * **Batch Document Combining**: Add multiple PDF documents and merge them into a single file with one click.
 * **Document Reordering**: Reorder files up and down to establish the exact sequence of chapters or attachments.
-* **Page Count Indicators**: Automatic page detection and total document page count summaries.
-* **Safe Direct Stream Saving**: Writes directly to the destination path without temporary file staging or lockups.
 
 &nbsp;
 <p align="center">◈ ◈ ◈</p>
 &nbsp;
 
 ### 4. Split PDF Screen
-Extract individual pages or custom ranges with interactive thumbnail previews and dynamic range synchronization.
+Extract individual pages or custom ranges with interactive thumbnail previews.
+
+&nbsp;
+<p align="center">
+  <img width="700" alt="Anchor PDF - Split PDF" src="https://github.com/user-attachments/assets/0e950bf3-9832-47d7-bfa1-429fc91cdb58" />
+</p>
+&nbsp;
 
 * **Interactive Visual Pages Gallery**: Real-time thumbnail previews of every page in the source document.
 * **Extraction Modes**:
@@ -63,13 +86,17 @@ Extract individual pages or custom ranges with interactive thumbnail previews an
 &nbsp;
 
 ### 5. Reorganize PDF Screen
-Rearrange, rotate, duplicate, and remove pages with real-time visual previews.
+Rearrange, rotate, duplicate, and remove pages.
 
-* **Centered Visual Thumbnail Previews**: High-resolution rendered cards centered in the view for clean inspection.
+&nbsp;
+<p align="center">
+  <img width="700" alt="Anchor PDF - Reorganize PDF" src="https://github.com/user-attachments/assets/3009079f-e666-477b-8df6-6e2cd3f6f055" />
+</p>
+&nbsp;
+
 * **Page Movement**: Move selected pages left or right to customize the document flow.
 * **Rotation Controls**: Rotate individual pages 90° clockwise or counter-clockwise with immediate visual preview.
 * **Page Duplication & Deletion**: Duplicate recurring forms or remove unwanted pages directly from card quick action buttons.
-* **Reset Order**: Restore the original page order at any time with a single click.
 
 &nbsp;
 <p align="center">◈ ◈ ◈</p>
@@ -78,8 +105,11 @@ Rearrange, rotate, duplicate, and remove pages with real-time visual previews.
 ### 6. About Screen
 Application details, local privacy architecture, and GitHub repository information.
 
-* **Privacy Architecture**: 100% offline local processing with zero telemetry and zero cloud storage.
-* **GitHub Repository**: Direct links to access source code and updates.
+&nbsp;
+<p align="center">
+  <img width="700" alt="Anchor PDF - About App" src="https://github.com/user-attachments/assets/40d621b6-61f8-44a3-aef1-2edf27b2d455" />
+</p>
+&nbsp;
 
 &nbsp;
 <p align="center">◈ ◈ ◈</p>
@@ -103,13 +133,12 @@ Application details, local privacy architecture, and GitHub repository informati
 <p align="center">◈ ◈ ◈</p>
 &nbsp;
 
-## Privacy & Non-Destructive File Safety Policy
+## Privacy Policy
 
 Anchor PDF is built with strict safety and privacy guarantees:
 
 * **100% Offline Processing**: Zero server dependencies, zero telemetry, and zero network calls. All rendering and compilation operations execute locally on your machine.
-* **Strict Read-Only Source Policy**: Original user source files (input PDFs and images) are opened with shared read access and are never modified, overwritten, or deleted.
-* **Direct Stream Saving**: Output files stream directly into destination FileStreams rather than staging in `%TEMP%` directories, preventing permission inheritance issues and antivirus file locks.
+* **Read-Only Source Policy**: Original user source files (input PDFs and images) are opened with shared read access and are never modified, overwritten, or deleted.
 
 &nbsp;
 <p align="center">◈ ◈ ◈</p>
@@ -130,5 +159,4 @@ Anchor PDF is distributed as a **portable single-file executable (`.exe`)**:
 
 ## Reporting Bugs & Feedback
 
-* If you encounter issues, formatting anomalies, or have feature suggestions, please report them on the [GitHub Issues](https://github.com/arshdeepsingh404/Anchor-PDF-Project/issues) page.
-* Attaching sample non-confidential PDF documents helps diagnose rendering edge cases and expedite fixes.
+* If you encounter issues or have feature suggestions, please report them on the [GitHub Issues](https://github.com/arshdeepsingh404/Anchor-PDF/issues) page.
