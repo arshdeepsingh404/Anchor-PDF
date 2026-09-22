@@ -56,7 +56,6 @@ Merge multiple PDF documents into a single organized PDF file.
   <img width="700" alt="Anchor PDF - Merge PDF" src="https://github.com/user-attachments/assets/4a1da4d0-b986-4525-9523-fb15aa55f334" />
 </p>
 &nbsp;
-<img width="3840" height="2292" alt="Screenshot 4 - Split PDF" src="https://github.com/user-attachments/assets/6b13db7c-d47e-4ead-89b5-dc611b2062e5" />
 
 * **Batch Document Combining**: Add multiple PDF documents and merge them into a single file with one click.
 * **Document Reordering**: Reorder files up and down to establish the exact sequence of chapters or attachments.
