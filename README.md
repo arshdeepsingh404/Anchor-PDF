@@ -157,5 +157,4 @@ Anchor PDF is distributed as a **portable single-file executable (`.exe`)**:
 &nbsp;
 
 ## Reporting Bugs & Feedback
-
-* If you encounter issues or have feature suggestions, please report them on the [GitHub Issues](https://github.com/arshdeepsingh404/Anchor-PDF/issues) page.
+If you encounter issues or have feature suggestions, please report them on the [GitHub Issues](https://github.com/arshdeepsingh404/Anchor-PDF/issues) page.
