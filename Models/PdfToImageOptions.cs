@@ -5,7 +5,7 @@ public class PdfToImageOptions
     public required string SourcePdfPath { get; set; }
     public required string OutputDirectory { get; set; }
     public ImageFormatType Format { get; set; } = ImageFormatType.PNG;
-    public int Dpi { get; set; } = 150;
+    public int Dpi { get; set; } = 300;
     public string PageRange { get; set; } = "All";
     public IReadOnlyList<int>? SpecificPages { get; set; }
     public bool ExportAsZip { get; set; } = false;

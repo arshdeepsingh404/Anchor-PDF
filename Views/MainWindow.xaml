@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodels="clr-namespace:Anchor_PDF.ViewModels"
         xmlns:models="clr-namespace:Anchor_PDF.Models"
+        xmlns:converters="clr-namespace:Anchor_PDF.Converters"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel, IsDesignTimeCreatable=False}"
         Title="Anchor PDF"

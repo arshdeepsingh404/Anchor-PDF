@@ -64,7 +64,7 @@ public partial class PdfToImageViewModel : ObservableObject
     private ImageFormatType _selectedFormat = ImageFormatType.PNG;
 
     [ObservableProperty]
-    private int _selectedDpi = 150;
+    private int _selectedDpi = 300;
 
     [ObservableProperty]
     private bool _exportAsZip;
